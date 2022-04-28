@@ -1,0 +1,23 @@
+{
+  "name": "nodejs.lnd",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yan-Black/nodejs.lnd.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Yan-Black/nodejs.lnd/issues"
+  },
+  "homepage": "https://github.com/Yan-Black/nodejs.lnd#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}
