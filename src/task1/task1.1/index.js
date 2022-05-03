@@ -1,13 +1,19 @@
 import { Transform } from "stream";
 import { stdin as input, stdout as output } from "node:process";
+import InputTransformer from "./inputTransformer.mjs";
 
-class TransformInput extends Transform {
+class InputReverseTransform extends Transform {
   _transform(chunk, encoding, callback) {
     const result = chunk.toString().split("").reverse().join("").trim();
     callback(null, result);
   }
 }
 
-const transformInput = new TransformInput();
+const inputReverseTransform = new InputReverseTransform();
+const inputTransformer = new InputTransformer(
+  input,
+  output,
+  inputReverseTransform
+);
 
-input.pipe(transformInput).on("error", console.error).pipe(output);
+inputTransformer.init();
