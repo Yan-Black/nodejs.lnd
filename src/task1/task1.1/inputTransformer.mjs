@@ -1,7 +1,9 @@
+import { stdin as input, stdout as output } from "node:process";
+
 export default class InputTransformer {
-  constructor(input, output, transformer) {
-    this.input = input;
-    this.output = output;
+  constructor(transformer) {
+    this._input = input;
+    this._output = output;
     this.transformer = transformer;
   }
 
@@ -10,17 +12,24 @@ export default class InputTransformer {
   }
 
   init() {
-    if (!this.input.pipe || !this.transformer.pipe || !this.output.pipe) {
+    if (!this._input || !this._output) {
+      return;
+    }
+
+    if (
+      !this.transformer._transform ||
+      typeof this.transformer._transform !== "function"
+    ) {
       console.warn(
-        "input, transformer and output must be of stream type and has pipe method"
+        "transformer must implement Stream.Transfrom._transform method"
       );
 
       return;
     }
 
-    this.input
+    this._input
       .pipe(this.transformer)
       .on("error", InputTransformer.onError)
-      .pipe(this.output);
+      .pipe(this._output);
   }
 }
