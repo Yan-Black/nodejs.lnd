@@ -8,7 +8,7 @@ export default class InputTransformer {
   }
 
   static onError(error) {
-    console.error(error.message || error);
+    console.error(error.message);
   }
 
   init() {
