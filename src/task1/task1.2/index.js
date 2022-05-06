@@ -17,6 +17,7 @@ readableStream
   .pipe(jsonKeysTransform)
   .on("error", console.error)
   .pipe(writableStream)
+  .on("error", console.error)
   .on("finish", () => {
     console.log("csv has been processed");
     process.exit();

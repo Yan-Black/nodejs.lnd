@@ -16,7 +16,9 @@ class JSONKeysTransform extends Transform {
 
       callback(null, `${JSON.stringify(processedObj)}\n`);
     } catch (error) {
-      throw error;
+      console.error(error.message);
+      console.log("unable to update JSON keys");
+      callback(null, chunk);
     }
   }
 }
