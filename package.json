@@ -6,8 +6,12 @@
   "scripts": {
     "task1.1": "npm run build:task1.1 && nodemon dist/task1/task1.1",
     "task1.2": "npm run build:task1.2 && nodemon dist/task1/task1.2",
+    "task2.1": "npm run build:task2.1 && nodemon dist/task2/task2.1",
+    "task2.2": "npm run build:task2.2 && nodemon dist/task2/task2.2",
     "build:task1.1": "babel src/task1/task1.1/**.js -d dist/task1/task1.1",
-    "build:task1.2": "babel src/task1/task1.2/**.js -d dist/task1/task1.2"
+    "build:task1.2": "babel src/task1/task1.2/**.js -d dist/task1/task1.2",
+    "build:task2.1": "babel src/task2/task2.1/**.js -d dist/task2/task2.1",
+    "build:task2.2": "babel src/task2/task2.2/**.js -d dist/task2/task2.2"
   },
   "repository": {
     "type": "git",
@@ -32,6 +36,7 @@
   },
   "dependencies": {
     "csvtojson": "^2.0.10",
-    "express": "^4.18.1"
+    "express": "^4.18.1",
+    "uuid": "^8.3.2"
   }
 }
