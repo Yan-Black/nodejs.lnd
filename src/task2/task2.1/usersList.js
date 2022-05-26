@@ -11,19 +11,12 @@ class UsersList {
     return user || null;
   }
 
-  getAutoSuggestUsers(loginSubstring, limit = 1) {
-    if (!loginSubstring || typeof loginSubstring !== 'string') {
-      return null;
-    }
-
+  getAutoSuggestUsers(loginSubstring, limit) {
     const filteredUsers = this.usersList.filter((user) => {
       return user.login.includes(loginSubstring);
     });
 
-    return filteredUsers.slice(
-      0,
-      (limit && typeof limit === 'number') || filteredUsers.length
-    );
+    return filteredUsers.slice(0, limit);
   }
 
   createUser(user) {
