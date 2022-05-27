@@ -12,15 +12,19 @@ class UsersList {
   }
 
   getAutoSuggestUsers(loginSubstring, limit) {
-    const filteredUsers = this.usersList.filter((user) => {
-      return user.login.includes(loginSubstring);
+    const searchSubstringToLower = loginSubstring.toLowerCase();
+
+    const filteredUsers = this.usersList.filter(({ login }) => {
+      const loginToLower = login.toLowerCase();
+
+      return loginToLower.includes(searchSubstringToLower);
     });
 
     return filteredUsers.slice(0, limit);
   }
 
   createUser(user) {
-    this.usersList.push(user);
+    !this.getUserById(user.id) && this.usersList.push(user);
   }
 
   softDeleteUser(id) {

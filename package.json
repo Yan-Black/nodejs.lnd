@@ -11,7 +11,8 @@
     "task2.1": "npm run build:task2.1 && nodemon dist/task2/task2.1",
     "task2.2": "npm run build:task2.1 && npm run build:task2.2 && nodemon dist/task2/task2.1",
     "build:task2.1": "babel src/task2/task2.1/**.js -d dist/task2/task2.1",
-    "build:task2.2": "babel src/task2/task2.2/**.js -d dist/task2/task2.2"
+    "build:task2.2": "babel src/task2/task2.2/**.js -d dist/task2/task2.2",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -30,7 +31,7 @@
     "@babel/preset-env": "^7.17.10",
     "babel-plugin-transform-import-meta": "^2.1.1",
     "eslint": "^8.16.0",
-    "jest": "^28.0.3",
+    "jest": "^28.1.0",
     "nodemon": "^2.0.15",
     "prettier": "^2.6.2"
   },
