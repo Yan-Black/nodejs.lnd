@@ -11,7 +11,13 @@ const mockUser = {
   age: 29
 };
 
+test('shuld return mock users collection', () => {
+  const list = usersList.getUsers();
+  expect(list).toHaveLength(10);
+});
+
 test('should add new user to the collection if input data is valid', () => {
+  usersList.usersList = [];
   usersList.createUser(mockUser);
 
   expect(usersList.usersList).toHaveLength(1);
@@ -47,11 +53,9 @@ test('usersList getAutoSuggestUsers return list of users matching specified para
 });
 
 test('should change user isDeleted property to true if delete method called', () => {
-  usersList.softDeleteUser(id).then(() => {
-    const [deletedUser] = usersList.usersList;
+  const deletedUser = usersList.softDeleteUser(id);
 
-    expect(deletedUser.isDeleted).toBeTruthy();
-  });
+  expect(deletedUser.isDeleted).toBeTruthy();
 });
 
 test('should update user data when update method with valid input called', () => {
@@ -74,9 +78,7 @@ test('should update user data when update method with valid input called', () =>
   };
 
   usersList.createUser(initialUserData);
-  usersList.updateUser(updatedUserData).then(() => {
-    const updatedUser = usersList.getUserById(id);
+  const updatedUser = usersList.updateUser(updatedUserData);
 
-    expect(updatedUser.login).toMatch('Oleh');
-  });
+  expect(updatedUser.login).toMatch('Oleh');
 });

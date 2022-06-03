@@ -52,8 +52,8 @@ export default class UsersServiceController {
     const { body: userInfo } = req;
 
     try {
-      usersList.updateUser(userInfo);
-      res.status(responseStatuses.successStatusNoResp).end();
+      const updatedUser = usersList.updateUser(userInfo);
+      res.json(updatedUser);
     } catch (error) {
       res
         .status(responseStatuses.notFoundStatus)
@@ -65,8 +65,8 @@ export default class UsersServiceController {
     const { body } = req;
 
     try {
-      usersList.softDeleteUser(body.id);
-      res.status(responseStatuses.successStatusNoResp).end();
+      const deletedUser = usersList.softDeleteUser(body.id);
+      res.json(deletedUser);
     } catch (error) {
       res
         .status(responseStatuses.notFoundStatus)

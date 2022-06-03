@@ -6,7 +6,7 @@ export const userBodyJoiValidate = (req, res, next) => {
   const { body } = req;
   const { error } = schema.validate(body);
 
-  if (error.isJoi) {
+  if (error?.isJoi) {
     res
       .status(responseStatuses.clientErrorStatus)
       .json(getJoiErrorResponse(error.details));

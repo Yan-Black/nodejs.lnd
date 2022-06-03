@@ -1,6 +1,8 @@
+import mockData from './mockData';
+
 class UsersList {
   constructor() {
-    this.usersList = [];
+    this.usersList = mockData;
   }
 
   getUsers() {
@@ -9,7 +11,7 @@ class UsersList {
 
   getUserById(id) {
     const user = this.usersList.find(
-      (userData) => userData.id === id && !user.isDeleted
+      (userData) => userData.id === id && !userData.isDeleted
     );
 
     return user || null;
@@ -36,9 +38,10 @@ class UsersList {
 
     if (userToDelete) {
       userToDelete.isDeleted = true;
-    } else {
-      throw Error;
+      return userToDelete;
     }
+
+    throw Error;
   }
 
   updateUser(user) {
@@ -46,9 +49,10 @@ class UsersList {
 
     if (userToUpdate) {
       Object.assign(userToUpdate, user);
-    } else {
-      throw Error;
+      return userToUpdate;
     }
+
+    throw Error;
   }
 }
 
