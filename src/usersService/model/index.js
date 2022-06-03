@@ -3,9 +3,13 @@ class UsersList {
     this.usersList = [];
   }
 
+  getUsers() {
+    return this.usersList.filter(({ isDeleted }) => !isDeleted);
+  }
+
   getUserById(id) {
     const user = this.usersList.find(
-      (user) => user.id === id && !user.isDeleted
+      (userData) => userData.id === id && !user.isDeleted
     );
 
     return user || null;
@@ -28,29 +32,23 @@ class UsersList {
   }
 
   softDeleteUser(id) {
-    return new Promise((resolve, reject) => {
-      const userToDelete = this.getUserById(id);
+    const userToDelete = this.getUserById(id);
 
-      if (userToDelete) {
-        userToDelete.isDeleted = true;
-        resolve();
-      }
-
-      reject();
-    });
+    if (userToDelete) {
+      userToDelete.isDeleted = true;
+    } else {
+      throw Error;
+    }
   }
 
   updateUser(user) {
-    return new Promise((resolve, reject) => {
-      const userToUpdate = this.getUserById(user.id);
+    const userToUpdate = this.getUserById(user.id);
 
-      if (userToUpdate) {
-        Object.assign(userToUpdate, user);
-        resolve();
-      }
-
-      reject();
-    });
+    if (userToUpdate) {
+      Object.assign(userToUpdate, user);
+    } else {
+      throw Error;
+    }
   }
 }
 

@@ -3,4 +3,4 @@ import { router } from './router';
 
 const app = express();
 
-app.use(express.json()).use('/', router).listen(8080);
+app.use(express.json()).use('/api/users', router).listen(8080);

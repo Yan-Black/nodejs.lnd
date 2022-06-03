@@ -1,5 +1,5 @@
-import { usersList } from './usersList';
 import { v4 as uuidv4 } from 'uuid';
+import { usersList } from '.';
 
 const id = uuidv4();
 
@@ -8,7 +8,7 @@ const mockUser = {
   login: 'Yan',
   password: '12345abcdE',
   isDeleted: false,
-  age: 29,
+  age: 29
 };
 
 test('should add new user to the collection if input data is valid', () => {
@@ -55,22 +55,22 @@ test('should change user isDeleted property to true if delete method called', ()
 });
 
 test('should update user data when update method with valid input called', () => {
-  const id = uuidv4();
+  const testId = uuidv4();
 
   const initialUserData = {
-    id,
+    id: testId,
     login: 'Dmytro',
     password: '12345abcdE',
     isDeleted: false,
-    age: 22,
+    age: 22
   };
 
   const updatedUserData = {
-    id,
+    id: testId,
     login: 'Oleh',
     password: '12345abcdE',
     isDeleted: false,
-    age: 33,
+    age: 33
   };
 
   usersList.createUser(initialUserData);
