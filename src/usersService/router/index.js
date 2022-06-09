@@ -1,6 +1,10 @@
 import express from 'express';
 import UsersServiceController from '../controllers';
-import { userBodyJoiValidate, validateQuery } from '../middlewares';
+import {
+  userBodyJoiValidate,
+  validateQuery,
+  executeIfNoQuery
+} from '../middlewares';
 
 const {
   getUsers,
@@ -14,11 +18,10 @@ const {
 const router = express.Router();
 
 router
-  .get('/', getUsers)
-  .get('/getAutoSuggestUsers', validateQuery, getAutoSuggestUsers)
+  .get('/', executeIfNoQuery(getUsers), validateQuery, getAutoSuggestUsers)
   .get('/:id', getUserById)
   .post('/', userBodyJoiValidate, createUser)
-  .put('/', userBodyJoiValidate, updateUser)
-  .delete('/', softDeleteUser);
+  .put('/:id', userBodyJoiValidate, updateUser)
+  .delete('/:id', softDeleteUser);
 
 export { router };

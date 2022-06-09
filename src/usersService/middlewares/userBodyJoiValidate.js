@@ -4,7 +4,7 @@ import { responseStatuses } from '../constants';
 
 export const userBodyJoiValidate = (req, res, next) => {
   const { body } = req;
-  const { error } = schema.validate(body);
+  const { error } = schema.validate(body, { abortEarly: false });
 
   if (error?.isJoi) {
     res

@@ -49,28 +49,27 @@ export default class UsersServiceController {
   }
 
   static updateUser(req, res) {
+    const { id } = req.params;
     const { body: userInfo } = req;
 
-    try {
-      const updatedUser = usersList.updateUser(userInfo);
-      res.json(updatedUser);
-    } catch (error) {
-      res
-        .status(responseStatuses.notFoundStatus)
-        .send(UsersServiceController.noUserFoundMessage(userInfo.id));
-    }
+    const respId = usersList.updateUser(id, userInfo);
+
+    respId
+      ? res.json({ id: respId })
+      : res
+          .status(responseStatuses.notFoundStatus)
+          .send(UsersServiceController.noUserFoundMessage(id));
   }
 
   static softDeleteUser(req, res) {
-    const { body } = req;
+    const { id } = req.params;
 
-    try {
-      const deletedUser = usersList.softDeleteUser(body.id);
-      res.json(deletedUser);
-    } catch (error) {
-      res
-        .status(responseStatuses.notFoundStatus)
-        .send(UsersServiceController.noUserFoundMessage(body.id));
-    }
+    const respId = usersList.softDeleteUser(id);
+
+    respId
+      ? res.json({ id: respId })
+      : res
+          .status(responseStatuses.notFoundStatus)
+          .send(UsersServiceController.noUserFoundMessage(id));
   }
 }

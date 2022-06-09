@@ -38,21 +38,21 @@ class UsersList {
 
     if (userToDelete) {
       userToDelete.isDeleted = true;
-      return userToDelete;
+      return id;
     }
 
-    throw Error;
+    return null;
   }
 
-  updateUser(user) {
-    const userToUpdate = this.getUserById(user.id);
+  updateUser(id, user) {
+    const userToUpdate = this.getUserById(id);
 
     if (userToUpdate) {
       Object.assign(userToUpdate, user);
-      return userToUpdate;
+      return id;
     }
 
-    throw Error;
+    return null;
   }
 }
 
