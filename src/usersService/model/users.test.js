@@ -53,9 +53,12 @@ test('usersList getAutoSuggestUsers return list of users matching specified para
 });
 
 test('should change user isDeleted property to true if delete method called', () => {
-  const deletedUser = usersList.softDeleteUser(id);
+  const respId = usersList.softDeleteUser(id);
+  const deleted = usersList.usersList.find(
+    ({ id: userId }) => userId === respId
+  );
 
-  expect(deletedUser.isDeleted).toBeTruthy();
+  expect(deleted.isDeleted).toBeTruthy();
 });
 
 test('should update user data when update method with valid input called', () => {
@@ -70,7 +73,6 @@ test('should update user data when update method with valid input called', () =>
   };
 
   const updatedUserData = {
-    id: testId,
     login: 'Oleh',
     password: '12345abcdE',
     isDeleted: false,
@@ -78,7 +80,11 @@ test('should update user data when update method with valid input called', () =>
   };
 
   usersList.createUser(initialUserData);
-  const updatedUser = usersList.updateUser(updatedUserData);
 
-  expect(updatedUser.login).toMatch('Oleh');
+  const respId = usersList.updateUser(testId, updatedUserData);
+  const updated = usersList.usersList.find(
+    ({ id: userId }) => userId === respId
+  );
+
+  expect(updated.login).toMatch('Oleh');
 });
