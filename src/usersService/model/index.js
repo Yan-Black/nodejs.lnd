@@ -1,61 +1,18 @@
-import mockData from './mockData';
+import { Sequelize } from 'sequelize';
+import config from '../config';
+import user from './user.model';
+import { fillWithPredifinedDataIfEmpty } from '../config/fillWithPredifinedDataIfEmpty';
 
-class UsersList {
-  constructor() {
-    this.usersList = mockData;
-  }
+const { dbName, userName, password, ...options } = config;
 
-  getUsers() {
-    return this.usersList.filter(({ isDeleted }) => !isDeleted);
-  }
+const sequelize = new Sequelize(dbName, userName, password, options);
 
-  getUserById(id) {
-    const user = this.usersList.find(
-      (userData) => userData.id === id && !userData.isDeleted
-    );
+const db = {
+  Sequelize,
+  sequelize,
+  user: user(sequelize, Sequelize)
+};
 
-    return user || null;
-  }
+await fillWithPredifinedDataIfEmpty(db);
 
-  getAutoSuggestUsers(loginSubstring, limit) {
-    const searchSubstringToLower = loginSubstring.toLowerCase();
-
-    const filteredUsers = this.usersList.filter(({ login }) => {
-      const loginToLower = login.toLowerCase();
-
-      return loginToLower.includes(searchSubstringToLower);
-    });
-
-    return filteredUsers.slice(0, limit);
-  }
-
-  createUser(user) {
-    !this.getUserById(user.id) && this.usersList.push(user);
-  }
-
-  softDeleteUser(id) {
-    const userToDelete = this.getUserById(id);
-
-    if (userToDelete) {
-      userToDelete.isDeleted = true;
-      return id;
-    }
-
-    return null;
-  }
-
-  updateUser(id, user) {
-    const userToUpdate = this.getUserById(id);
-
-    if (userToUpdate) {
-      Object.assign(userToUpdate, user);
-      return id;
-    }
-
-    return null;
-  }
-}
-
-const usersList = new UsersList();
-
-export { usersList };
+export { db };
