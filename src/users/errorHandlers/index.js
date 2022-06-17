@@ -1,2 +1,2 @@
 export * from './errorHandler';
-export * from './logErrors';
+export * from './catchJsonErrors';

@@ -3,28 +3,22 @@ module.exports = {
     await queryInterface.createTable('Users', {
       id: {
         allowNull: false,
+        primaryKey: true,
         type: Sequelize.UUID,
-        defaultValue: Sequelize.UUIDV4,
-        primaryKey: true
+        defaultValue: Sequelize.UUIDV4
       },
-      login: {
-        type: Sequelize.STRING
-      },
-      password: {
-        type: Sequelize.STRING
-      },
-      age: {
-        type: Sequelize.INTEGER
-      },
-      isDeleted: {
-        type: Sequelize.BOOLEAN
-      },
+      login: Sequelize.STRING,
+      password: Sequelize.STRING,
+      age: Sequelize.INTEGER,
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
       updatedAt: {
         allowNull: false,
+        type: Sequelize.DATE
+      },
+      deletedAt: {
         type: Sequelize.DATE
       }
     });

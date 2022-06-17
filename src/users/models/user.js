@@ -6,26 +6,17 @@ export default (sequelize, DataTypes) => {
   User.init(
     {
       id: {
+        allowNull: false,
+        primaryKey: true,
         type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true
+        defaultValue: DataTypes.UUIDV4
       },
-      login: {
-        type: DataTypes.STRING
-      },
-      password: {
-        type: DataTypes.STRING
-      },
-      age: {
-        type: DataTypes.INTEGER
-      },
-      isDeleted: {
-        type: DataTypes.BOOLEAN
-      }
+      login: DataTypes.STRING,
+      password: DataTypes.STRING,
+      age: DataTypes.INTEGER
     },
     {
       sequelize,
-      modelName: 'User',
       paranoid: true,
       deletedAt: 'deletedAt',
       timestamps: true

@@ -1,6 +1,6 @@
 module.exports = {
-  config: 'src/usersService/config/index.js',
-  'migrations-path': 'src/usersService/migrations',
-  'models-path': 'src/usersService/models',
-  'seeders-path': 'src/usersService/seeders'
+  config: 'src/users/config/index.js',
+  'migrations-path': 'src/users/migrations',
+  'models-path': 'src/users/models',
+  'seeders-path': 'src/users/seeders'
 };

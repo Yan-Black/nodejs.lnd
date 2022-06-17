@@ -1,87 +1,85 @@
-import { db } from '../model';
+import { db } from '../models';
 import { responseStatuses } from '../constants';
 
-const User = db.user;
+const { User } = db;
+const { Op } = db.Sequelize;
+const attributes = { exclude: ['createdAt', 'updatedAt', 'deletedAt'] };
 
 export default class UsersServiceController {
-  static noUserFoundMessage(id) {
-    return `no user found by id: {${id}}`;
+  static notFoundResponse(id, res) {
+    res
+      .status(responseStatuses.notFoundStatus)
+      .send(`no user found by id: {${id}}`);
   }
 
-  static getUsers(req, res) {
-    User.findAll().then((users) => {
-      res.json(users);
+  static async getUsers(req, res) {
+    const users = await User.findAll({
+      attributes
     });
+
+    res.json(users);
   }
 
-  static getUserById(req, res) {
+  static async getUserById(req, res) {
     const { id } = req.params;
 
-    User.findByPk(id).then((user) => {
-      if (user) {
-        res.send(user);
-      } else {
-        res
-          .status(responseStatuses.notFoundStatus)
-          .send(UsersServiceController.noUserFoundMessage(id));
-      }
-    });
+    const user = await User.findByPk(id, { attributes });
+
+    if (user) {
+      res.send(user);
+    } else {
+      UsersServiceController.notFoundResponse(id, res);
+    }
   }
 
-  static getAutoSuggestUsers(req, res) {
+  static async getAutoSuggestUsers(req, res) {
     const { query } = req;
-    const { loginSubstring, limit } = query;
-    const condition = {
-      login: db.sequelize.where(
-        db.sequelize.fn('LOWER', db.sequelize.col('login')),
-        'LIKE',
-        `%${loginSubstring.toLowerCase()}%`
-      )
-    };
+    const { loginSubstring = '', limit = 10, offset = 0 } = query;
 
-    User.findAll({ where: condition }).then((users) => {
-      if (users) {
-        res.json(users.slice(0, limit));
-      } else {
-        res.status(responseStatuses.clientErrorStatus).end();
-      }
+    const users = await User.findAll({
+      attributes,
+      where: { login: { [Op.iLike]: `%${loginSubstring}` } },
+      limit,
+      offset
     });
+
+    res.json(users);
   }
 
-  static createUser(req, res) {
+  static async createUser(req, res) {
     const { body: userBody } = req;
 
-    User.create(userBody).then((userData) => {
-      res.json({ id: userData.id });
-    });
+    const { id } = await User.create(userBody);
+
+    res.json({ id });
   }
 
-  static updateUser(req, res) {
+  static async updateUser(req, res) {
     const { id } = req.params;
     const { body: userBody } = req;
 
-    User.update(userBody, { where: { id } }).then(([num]) => {
-      if (num === 1) {
-        res.send({
-          message: 'User was updated successfully.'
-        });
-      } else {
-        res.send(UsersServiceController.noUserFoundMessage(id));
-      }
-    });
+    const [num] = await User.update(userBody, { where: { id } });
+
+    if (num === 1) {
+      res.send({
+        message: 'User was updated successfully.'
+      });
+    } else {
+      UsersServiceController.notFoundResponse(id, res);
+    }
   }
 
-  static softDeleteUser(req, res) {
+  static async softDeleteUser(req, res) {
     const { id } = req.params;
 
-    User.destroy({ where: { id } }).then((num) => {
-      if (num === 1) {
-        res.send({
-          message: 'User was deleted successfully!'
-        });
-      } else {
-        res.send(UsersServiceController.noUserFoundMessage(id));
-      }
-    });
+    const num = await User.destroy({ where: { id } });
+
+    if (num === 1) {
+      res.send({
+        message: 'User was deleted successfully!'
+      });
+    } else {
+      UsersServiceController.notFoundResponse(id, res);
+    }
   }
 }
