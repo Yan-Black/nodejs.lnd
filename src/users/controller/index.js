@@ -12,7 +12,7 @@ export default class UsersServiceController {
       .send(`no user found by id: {${id}}`);
   }
 
-  static async getUsers(req, res) {
+  static async getAll(req, res) {
     const users = await User.findAll({
       attributes
     });
@@ -20,7 +20,7 @@ export default class UsersServiceController {
     res.json(users);
   }
 
-  static async getUserById(req, res) {
+  static async getById(req, res) {
     const { id } = req.params;
 
     const user = await User.findByPk(id, { attributes });
@@ -46,7 +46,7 @@ export default class UsersServiceController {
     res.json(users);
   }
 
-  static async createUser(req, res) {
+  static async create(req, res) {
     const { body: userBody } = req;
 
     const { id } = await User.create(userBody);
@@ -54,7 +54,7 @@ export default class UsersServiceController {
     res.json({ id });
   }
 
-  static async updateUser(req, res) {
+  static async update(req, res) {
     const { id } = req.params;
     const { body: userBody } = req;
 
@@ -69,7 +69,7 @@ export default class UsersServiceController {
     }
   }
 
-  static async softDeleteUser(req, res) {
+  static async softDelete(req, res) {
     const { id } = req.params;
 
     const num = await User.destroy({ where: { id } });

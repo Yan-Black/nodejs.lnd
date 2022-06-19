@@ -6,8 +6,7 @@ const {
 } = require('unique-names-generator');
 
 const getRandomAge = () => Math.ceil(Math.random() * 10 + 20);
-
-module.exports = new Array(10).fill(null).map(() => ({
+const createSeed = () => ({
   id: uuidv4(),
   login: generateLogin({ dictionaries: [names] }),
   password: generatePassword({ length: 8, numbers: true }),
@@ -15,4 +14,6 @@ module.exports = new Array(10).fill(null).map(() => ({
   createdAt: new Date(),
   updatedAt: new Date(),
   deletedAt: null
-}));
+});
+
+module.exports = new Array(10).fill(null).map(createSeed);
