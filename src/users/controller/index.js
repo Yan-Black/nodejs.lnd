@@ -3,7 +3,7 @@ import { responseStatuses } from '../constants';
 
 const { User } = db;
 const { Op } = db.Sequelize;
-const attributes = { exclude: ['createdAt', 'updatedAt', 'deletedAt'] };
+const attributes = ['createdAt', 'updatedAt', 'deletedAt'];
 
 export default class UsersServiceController {
   static notFoundResponse(id, res) {
@@ -12,18 +12,24 @@ export default class UsersServiceController {
       .send(`no user found by id: {${id}}`);
   }
 
-  static async getAll(req, res) {
+  static async getUsers(req, res) {
     const users = await User.findAll({
-      attributes
+      attributes: {
+        exclude: attributes
+      }
     });
 
     res.json(users);
   }
 
-  static async getById(req, res) {
+  static async getUserById(req, res) {
     const { id } = req.params;
 
-    const user = await User.findByPk(id, { attributes });
+    const user = await User.findByPk(id, {
+      attributes: {
+        exclude: attributes
+      }
+    });
 
     if (user) {
       res.send(user);
@@ -37,7 +43,9 @@ export default class UsersServiceController {
     const { loginSubstring = '', limit = 10, offset = 0 } = query;
 
     const users = await User.findAll({
-      attributes,
+      attributes: {
+        exclude: attributes
+      },
       where: { login: { [Op.iLike]: `%${loginSubstring}` } },
       limit,
       offset
@@ -46,7 +54,7 @@ export default class UsersServiceController {
     res.json(users);
   }
 
-  static async create(req, res) {
+  static async createUser(req, res) {
     const { body: userBody } = req;
 
     const { id } = await User.create(userBody);
@@ -54,7 +62,7 @@ export default class UsersServiceController {
     res.json({ id });
   }
 
-  static async update(req, res) {
+  static async updateUser(req, res) {
     const { id } = req.params;
     const { body: userBody } = req;
 
@@ -69,7 +77,7 @@ export default class UsersServiceController {
     }
   }
 
-  static async softDelete(req, res) {
+  static async softDeleteUser(req, res) {
     const { id } = req.params;
 
     const num = await User.destroy({ where: { id } });
