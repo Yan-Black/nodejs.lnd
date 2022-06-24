@@ -1,24 +1,20 @@
 import express from 'express';
-import UsersServiceController from '../controllers';
-import {
-  userBodyJoiValidate,
-  validateQuery,
-  executeIfNoQuery
-} from '../middlewares';
+import UsersServiceController from '../controller';
+import { userBodyJoiValidate, executeIfNoQuery } from '../middlewares';
 
 const {
   getUsers,
   getAutoSuggestUsers,
   getUserById,
   createUser,
-  softDeleteUser,
-  updateUser
+  updateUser,
+  softDeleteUser
 } = UsersServiceController;
 
 const router = express.Router();
 
 router
-  .get('/', executeIfNoQuery(getUsers), validateQuery, getAutoSuggestUsers)
+  .get('/', executeIfNoQuery(getUsers), getAutoSuggestUsers)
   .get('/:id', getUserById)
   .post('/', userBodyJoiValidate, createUser)
   .put('/:id', userBodyJoiValidate, updateUser)
