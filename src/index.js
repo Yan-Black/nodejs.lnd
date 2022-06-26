@@ -2,8 +2,8 @@ import 'dotenv/config';
 import 'express-async-errors';
 import express from 'express';
 import cors from 'cors';
-import { catchJsonErrors, errorHandler } from './errorHandlers';
-import { router } from './router';
+import { errorHandler } from './errorHandlers';
+import { usersRouter, groupsRouter } from './routers';
 import { db } from './models';
 
 await db.sequelize.sync();
@@ -14,10 +14,10 @@ const { PORT } = process.env;
 app
   .use(cors())
   .use(express.json())
-  .use('/api/v1/users', router)
-  .use(catchJsonErrors)
+  .use('/api/v1/users', usersRouter)
+  .use('/api/v1/groups', groupsRouter)
   .use(errorHandler);
 
 app.listen(PORT, () => {
-  global.console.log(`listening at <http://localhost:${PORT}>`);
+  global.console.log(`listening at http://localhost:${PORT}`);
 });

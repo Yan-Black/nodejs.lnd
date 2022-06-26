@@ -1,7 +1,7 @@
 import request from 'supertest';
 import express from 'express';
 import { describe, expect, it } from '@jest/globals';
-import { router } from '.';
+import { router } from './users';
 
 const defaultPath = '/api/users';
 const app = express();

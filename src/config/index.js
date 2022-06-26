@@ -3,26 +3,24 @@ import 'dotenv/config';
 const { DB_NAME_DEV, DB_NAME_TEST, DB_NAME_PROD, USER_NAME, PASSWORD, HOST } =
   process.env;
 
+const baseConfig = {
+  username: USER_NAME,
+  password: PASSWORD,
+  database: DB_NAME_DEV,
+  host: HOST,
+  dialect: 'postgres'
+};
+
 export default {
   development: {
-    username: USER_NAME,
-    password: PASSWORD,
-    database: DB_NAME_DEV,
-    host: HOST,
-    dialect: 'postgres'
+    ...baseConfig
   },
   test: {
-    username: USER_NAME,
-    password: PASSWORD,
-    database: DB_NAME_TEST,
-    host: HOST,
-    dialect: 'postgres'
+    ...baseConfig,
+    database: DB_NAME_TEST
   },
   production: {
-    username: USER_NAME,
-    password: PASSWORD,
-    database: DB_NAME_PROD,
-    host: HOST,
-    dialect: 'postgres'
+    ...baseConfig,
+    database: DB_NAME_PROD
   }
 };

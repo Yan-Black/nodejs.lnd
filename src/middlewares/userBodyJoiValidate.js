@@ -1,8 +1,7 @@
-import { schema } from '../validation/schema';
 import { getJoiErrorResponse } from '../helpers';
 import { responseStatuses } from '../constants';
 
-export const userBodyJoiValidate = (req, res, next) => {
+export const joiValidate = (schema) => (req, res, next) => {
   const { body } = req;
   const { error } = schema.validate(body, { abortEarly: false });
 
