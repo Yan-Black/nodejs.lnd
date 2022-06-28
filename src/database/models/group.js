@@ -1,7 +1,11 @@
 import { Model } from 'sequelize';
 
 export default (sequelize, DataTypes) => {
-  class Group extends Model {}
+  class Group extends Model {
+    static associate(models) {
+      Group.belongsToMany(models.User, { through: models.UserGroup });
+    }
+  }
 
   Group.init(
     {
