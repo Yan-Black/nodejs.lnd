@@ -16,10 +16,11 @@ export default (sequelize, DataTypes) => {
         defaultValue: DataTypes.UUIDV4
       },
       name: DataTypes.STRING,
-      permission: DataTypes.STRING
+      permission: DataTypes.ARRAY(DataTypes.STRING)
     },
     {
       sequelize,
+      modelName: 'Group',
       timestamps: false
     }
   );

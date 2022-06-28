@@ -23,6 +23,7 @@ export default (sequelize, DataTypes) => {
       sequelize,
       paranoid: true,
       deletedAt: 'deletedAt',
+      modelName: 'User',
       timestamps: true
     }
   );
