@@ -14,12 +14,7 @@ const sequelize = new Sequelize(database, username, password, {
 
 const User = userModelInit(sequelize, Sequelize.DataTypes);
 const Group = groupModelInit(sequelize, Sequelize.DataTypes);
-const UserGroup = userGroupModelInit(
-  sequelize,
-  Sequelize.DataTypes,
-  User,
-  Group
-);
+const UserGroup = userGroupModelInit(sequelize);
 
 const db = {
   sequelize,
@@ -29,6 +24,6 @@ const db = {
   UserGroup
 };
 
-[db.User, db.Group].forEach((model) => model.associate?.(db));
+[User, Group].forEach((Model) => Model.associate(db));
 
 export { db };

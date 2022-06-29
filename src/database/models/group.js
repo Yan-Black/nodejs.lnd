@@ -20,7 +20,7 @@ export default (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: 'Group',
+      modelName: Group.name,
       timestamps: false
     }
   );

@@ -6,11 +6,13 @@
   "type": "module",
   "scripts": {
     "start": "set NODE_ENV=development&&nodemon --experimental-specifier-resolution=node src",
-    "db:seed:all": "sequelize-cli db:seed:all",
-    "db:seed:undo:all": "sequelize-cli db:seed:undo:all",
     "db:create": "sequelize-cli db:create",
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "db:migrate:undo:all": "sequelize-cli db:migrate:undo:all",
+    "db:migrate:reset": "npm run db:migrate:undo:all && npm run db:migrate",
+    "db:seed:all": "sequelize-cli db:seed:all",
+    "db:seed:undo:all": "sequelize-cli db:seed:undo:all",
     "test": "set NODE_ENV=test&&npm run db:migrate&&npm run db:seed:undo:all&&npm run db:seed:all&&jest",
     "eslint": "eslint src/**"
   },

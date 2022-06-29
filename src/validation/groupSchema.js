@@ -1,6 +1,5 @@
 import joi from 'joi';
-
-const permissions = ['READ', 'WRITE', 'DELETE', 'SHARE', 'UPLOAD_FILES'];
+import { permissions } from '../constants';
 
 const groupSchema = joi.object({
   id: joi.string().optional(),

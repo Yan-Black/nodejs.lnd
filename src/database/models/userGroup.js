@@ -1,26 +1,13 @@
 import { Model } from 'sequelize';
 
-export default (sequelize, DataTypes, User, Group) => {
-  class UserGroup extends Model {}
+export default (sequelize) => {
+  class UserGroup extends Model {
+    static associate() {}
+  }
 
   UserGroup.init(
-    {
-      userId: {
-        type: DataTypes.UUID,
-        references: {
-          model: User,
-          key: 'id'
-        }
-      },
-      groupId: {
-        type: DataTypes.UUID,
-        references: {
-          model: Group,
-          key: 'id'
-        }
-      }
-    },
-    { sequelize, timestamps: false }
+    {},
+    { sequelize, timestamps: false, modelName: UserGroup.name }
   );
 
   return UserGroup;
