@@ -7,9 +7,7 @@ module.exports = {
         references: {
           model: 'Users',
           key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL'
+        }
       },
       groupId: {
         primaryKey: true,
@@ -17,9 +15,7 @@ module.exports = {
         references: {
           model: 'Groups',
           key: 'id'
-        },
-        onUpdate: 'CASCADE',
-        onDelete: 'SET NULL'
+        }
       }
     });
   },
