@@ -7,7 +7,6 @@
   },
   "extends": [
     "airbnb",
-    "airbnb/hooks",
     "plugin:prettier/recommended",
     "plugin:import/recommended"
   ],
