@@ -1,12 +1,12 @@
 import request from 'supertest';
 import express from 'express';
 import { describe, expect, it } from '@jest/globals';
-import { router } from './users';
+import { usersRouter } from './users';
 
 const defaultPath = '/api/users';
 const app = express();
 app.use(express.json());
-app.use(defaultPath, router);
+app.use(defaultPath, usersRouter);
 
 describe('Users Service -> Test Routes', () => {
   it('returns mock users on get request without query /', async () => {

@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "type": "module",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "start": "set NODE_ENV=development&&nodemon --experimental-specifier-resolution=node src",
     "db:create": "sequelize-cli db:create",
@@ -29,9 +32,11 @@
   "homepage": "https://github.com/Yan-Black/nodejs.lnd#readme",
   "devDependencies": {
     "eslint": "^8.16.0",
-    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-node": "^4.1.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.0.0",
     "jest": "^28.1.0",
     "nodemon": "^2.0.15",
