@@ -4,12 +4,12 @@ import userModelInit from './user';
 import groupModelInit from './group';
 import userGroupModelInit from './userGroup';
 
-const env = process.env.NODE_ENV || 'development';
+const env = process.env.NODE_ENV;
 const { database, username, password, ...options } = config[env];
 
 const sequelize = new Sequelize(database, username, password, {
-  ...options,
-  logging: false
+  ...options
+  // logging: false
 });
 
 const User = userModelInit(sequelize, Sequelize.DataTypes);

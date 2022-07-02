@@ -45,7 +45,9 @@ export default class UsersService {
   }
 
   static async create(userDTO) {
-    const { id } = await User.create(userDTO);
+    const {
+      dataValues: { id }
+    } = await User.create(userDTO);
 
     return id;
   }

@@ -1,5 +1,5 @@
 import UsersService from '../service/user';
-import { notFoundResponse } from '../helpers';
+import { responseStatuses } from '../constants';
 
 export default class UsersController {
   static async getUsers(req, res) {
@@ -16,13 +16,17 @@ export default class UsersController {
 
     const user = await UsersService.getById(id);
 
-    user ? res.send(user) : notFoundResponse(id, res);
+    user
+      ? res.send(user)
+      : res
+          .status(responseStatuses.notFoundStatus)
+          .send(`no user found by id: ${id}`);
   }
 
   static async createUser(req, res) {
     const { body: userDTO } = req;
 
-    const { id } = await UsersService.create(userDTO);
+    const id = await UsersService.create(userDTO);
 
     res.json({ id });
   }
@@ -37,7 +41,9 @@ export default class UsersController {
       ? res.send({
           message: 'User was updated successfully.'
         })
-      : notFoundResponse(id, res);
+      : res
+          .status(responseStatuses.notFoundStatus)
+          .send(`no user found by id: ${id}`);
   }
 
   static async softDeleteUser(req, res) {
@@ -49,6 +55,8 @@ export default class UsersController {
       ? res.send({
           message: 'User was deleted successfully!'
         })
-      : notFoundResponse(id, res);
+      : res
+          .status(responseStatuses.notFoundStatus)
+          .send(`no user found by id: ${id}`);
   }
 }

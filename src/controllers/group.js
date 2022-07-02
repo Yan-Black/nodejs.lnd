@@ -1,5 +1,5 @@
 import GroupService from '../service/group';
-import { notFoundResponse } from '../helpers';
+import { responseStatuses } from '../constants';
 
 export default class GroupController {
   static async getGroups(req, res) {
@@ -13,13 +13,17 @@ export default class GroupController {
 
     const group = await GroupService.getById(id);
 
-    group ? res.send(group) : notFoundResponse(id, res);
+    group
+      ? res.send(group)
+      : res
+          .status(responseStatuses.notFoundStatus)
+          .send(`no group found by id: ${id}`);
   }
 
   static async createGroup(req, res) {
     const { body: groupDTO } = req;
 
-    const { id } = await GroupService.create(groupDTO);
+    const id = await GroupService.create(groupDTO);
 
     res.json({ id });
   }
@@ -34,7 +38,9 @@ export default class GroupController {
       ? res.send({
           message: 'Group was updated successfully.'
         })
-      : notFoundResponse(id, res);
+      : res
+          .status(responseStatuses.notFoundStatus)
+          .send(`no group found by id: ${id}`);
   }
 
   static async deleteGroup(req, res) {
@@ -46,6 +52,8 @@ export default class GroupController {
       ? res.send({
           message: 'Group was deleted successfully!'
         })
-      : notFoundResponse(id, res);
+      : res
+          .status(responseStatuses.notFoundStatus)
+          .send(`no group found by id: ${id}`);
   }
 }

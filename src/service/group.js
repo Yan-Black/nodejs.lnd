@@ -15,14 +15,14 @@ export default class GroupService {
     return user;
   }
 
-  static async create(userDTO) {
-    const { id } = await Group.create(userDTO);
+  static async create(groupDTO) {
+    const { id } = await Group.create(groupDTO);
 
     return id;
   }
 
-  static async update(id, userDTO) {
-    const [num] = await Group.update(userDTO, { where: { id } });
+  static async update(id, groupDTO) {
+    const [num] = await Group.update(groupDTO, { where: { id } });
 
     return num === 1;
   }
