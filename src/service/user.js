@@ -6,23 +6,17 @@ const attributes = { exclude: ['createdAt', 'updatedAt', 'deletedAt'] };
 
 export default class UsersService {
   static async addUsersToGroup(groupId, userIds) {
-    try {
-      await sequelize.transaction(async (transaction) => {
-        (Array.isArray(userIds) ? userIds : [userIds]).forEach(
-          async (userId) => {
-            await UserGroup.create(
-              {
-                groupId,
-                userId
-              },
-              { transaction }
-            );
-          }
+    await sequelize.transaction(async (transaction) => {
+      (Array.isArray(userIds) ? userIds : [userIds]).forEach(async (userId) => {
+        await UserGroup.create(
+          {
+            groupId,
+            userId
+          },
+          { transaction }
         );
       });
-    } catch (error) {
-      global.console.error(error);
-    }
+    });
   }
 
   static async getAll(loginSubstring = '', limit = 10, offset = 0) {

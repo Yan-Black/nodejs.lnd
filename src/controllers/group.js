@@ -1,5 +1,5 @@
 import GroupService from '../service/group';
-import { responseStatuses } from '../constants';
+import { httpStatusCode } from '../constants';
 
 export default class GroupController {
   static async getGroups(req, res) {
@@ -16,7 +16,7 @@ export default class GroupController {
     group
       ? res.send(group)
       : res
-          .status(responseStatuses.notFoundStatus)
+          .status(httpStatusCode.NOT_FOUND)
           .send(`no group found by id: ${id}`);
   }
 
@@ -39,7 +39,7 @@ export default class GroupController {
           message: 'Group was updated successfully.'
         })
       : res
-          .status(responseStatuses.notFoundStatus)
+          .status(httpStatusCode.NOT_FOUND)
           .send(`no group found by id: ${id}`);
   }
 
@@ -53,7 +53,7 @@ export default class GroupController {
           message: 'Group was deleted successfully!'
         })
       : res
-          .status(responseStatuses.notFoundStatus)
+          .status(httpStatusCode.NOT_FOUND)
           .send(`no group found by id: ${id}`);
   }
 }

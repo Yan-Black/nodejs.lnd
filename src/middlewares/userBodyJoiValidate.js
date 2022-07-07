@@ -1,5 +1,5 @@
 import { getJoiErrorResponse } from '../helpers';
-import { responseStatuses } from '../constants';
+import { httpStatusCode } from '../constants';
 
 export const joiValidate = (schema) => (req, res, next) => {
   const { body } = req;
@@ -7,7 +7,7 @@ export const joiValidate = (schema) => (req, res, next) => {
 
   if (error?.isJoi) {
     res
-      .status(responseStatuses.clientErrorStatus)
+      .status(httpStatusCode.BAD_REQUEST)
       .json(getJoiErrorResponse(error.details));
   } else {
     next();

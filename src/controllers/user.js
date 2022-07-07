@@ -1,5 +1,5 @@
 import UsersService from '../service/user';
-import { responseStatuses } from '../constants';
+import { httpStatusCode } from '../constants';
 
 export default class UsersController {
   static async getUsers(req, res) {
@@ -18,9 +18,7 @@ export default class UsersController {
 
     user
       ? res.send(user)
-      : res
-          .status(responseStatuses.notFoundStatus)
-          .send(`no user found by id: ${id}`);
+      : res.status(httpStatusCode.NOT_FOUND).send(`no user found by id: ${id}`);
   }
 
   static async createUser(req, res) {
@@ -41,9 +39,7 @@ export default class UsersController {
       ? res.send({
           message: 'User was updated successfully.'
         })
-      : res
-          .status(responseStatuses.notFoundStatus)
-          .send(`no user found by id: ${id}`);
+      : res.status(httpStatusCode.NOT_FOUND).send(`no user found by id: ${id}`);
   }
 
   static async softDeleteUser(req, res) {
@@ -55,8 +51,6 @@ export default class UsersController {
       ? res.send({
           message: 'User was deleted successfully!'
         })
-      : res
-          .status(responseStatuses.notFoundStatus)
-          .send(`no user found by id: ${id}`);
+      : res.status(httpStatusCode.NOT_FOUND).send(`no user found by id: ${id}`);
   }
 }
