@@ -1,4 +1,5 @@
 import GroupService from '../service/group';
+import APIError from '../errorHandler/APIError';
 import { httpStatusCode } from '../constants';
 
 export default class GroupController {
@@ -13,11 +14,16 @@ export default class GroupController {
 
     const group = await GroupService.getById(id);
 
-    group
-      ? res.send(group)
-      : res
-          .status(httpStatusCode.NOT_FOUND)
-          .send(`no group found by id: ${id}`);
+    if (!group) {
+      throw new APIError({
+        name: 'not found',
+        statusCode: httpStatusCode.NOT_FOUND,
+        isOperational: true,
+        description: `no group found by id: ${id}`
+      });
+    }
+
+    res.send(group);
   }
 
   static async createGroup(req, res) {
@@ -34,13 +40,18 @@ export default class GroupController {
 
     const isSuccess = await GroupService.update(id, groupDTO);
 
-    isSuccess
-      ? res.send({
-          message: 'Group was updated successfully.'
-        })
-      : res
-          .status(httpStatusCode.NOT_FOUND)
-          .send(`no group found by id: ${id}`);
+    if (!isSuccess) {
+      throw new APIError(
+        'not found',
+        httpStatusCode.NOT_FOUND,
+        true,
+        `no group found by id: ${id}`
+      );
+    }
+
+    res.send({
+      message: 'Group was updated successfully.'
+    });
   }
 
   static async deleteGroup(req, res) {
@@ -48,12 +59,17 @@ export default class GroupController {
 
     const isSuccess = await GroupService.delete(id);
 
-    isSuccess
-      ? res.send({
-          message: 'Group was deleted successfully!'
-        })
-      : res
-          .status(httpStatusCode.NOT_FOUND)
-          .send(`no group found by id: ${id}`);
+    if (!isSuccess) {
+      throw new APIError(
+        'not found',
+        httpStatusCode.NOT_FOUND,
+        true,
+        `no group found by id: ${id}`
+      );
+    }
+
+    res.send({
+      message: 'Group was deleted successfully.'
+    });
   }
 }

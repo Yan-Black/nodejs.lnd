@@ -1,10 +1,10 @@
 export default class BaseError extends Error {
-  constructor({ name, httpCode, description, isOperational }) {
+  constructor({ name, statusCode, description, isOperational }) {
     super(description);
     Object.setPrototypeOf(this, new.target.prototype);
 
     this.name = name;
-    this.httpCode = httpCode;
+    this.statusCode = statusCode;
     this.isOperational = isOperational;
 
     Error.captureStackTrace(this);
