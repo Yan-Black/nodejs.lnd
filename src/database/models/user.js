@@ -27,10 +27,7 @@ export default (sequelize, DataTypes) => {
       paranoid: true,
       deletedAt: 'deletedAt',
       modelName: User.name,
-      timestamps: true,
-      hooks: {
-        afterDestroy(model) {}
-      }
+      timestamps: true
     }
   );
 
