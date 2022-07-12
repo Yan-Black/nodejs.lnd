@@ -1,5 +1,5 @@
 import UsersService from '../service/user';
-import { httpStatusCode } from '../constants';
+import HTTP404Error from '../errorHandler/HTTP404Error';
 
 export default class UsersController {
   static async getUsers(req, res) {
@@ -16,9 +16,11 @@ export default class UsersController {
 
     const user = await UsersService.getById(id);
 
-    user
-      ? res.send(user)
-      : res.status(httpStatusCode.NOT_FOUND).send(`no user found by id: ${id}`);
+    if (!user) {
+      throw new HTTP404Error(`no user found by id: ${id}`);
+    }
+
+    res.send(user);
   }
 
   static async createUser(req, res) {
@@ -35,11 +37,13 @@ export default class UsersController {
 
     const isSuccess = await UsersService.update(id, userDTO);
 
-    isSuccess
-      ? res.send({
-          message: 'User was updated successfully.'
-        })
-      : res.status(httpStatusCode.NOT_FOUND).send(`no user found by id: ${id}`);
+    if (!isSuccess) {
+      throw new HTTP404Error(`no user found by id: ${id}`);
+    }
+
+    res.send({
+      message: 'User was updated successfully.'
+    });
   }
 
   static async softDeleteUser(req, res) {
@@ -47,10 +51,12 @@ export default class UsersController {
 
     const isSuccess = await UsersService.delete(id);
 
-    isSuccess
-      ? res.send({
-          message: 'User was deleted successfully!'
-        })
-      : res.status(httpStatusCode.NOT_FOUND).send(`no user found by id: ${id}`);
+    if (!isSuccess) {
+      throw new HTTP404Error(`no user found by id: ${id}`);
+    }
+
+    res.send({
+      message: 'User was deleted successfully.'
+    });
   }
 }

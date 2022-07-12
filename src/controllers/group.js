@@ -1,11 +1,10 @@
 import GroupService from '../service/group';
-import APIError from '../errorHandler/APIError';
-import { httpStatusCode } from '../constants';
+import HTTP404Error from '../errorHandler/HTTP404Error';
 
 export default class GroupController {
   static async getGroups(req, res) {
     const groups = await GroupService.getAll();
-
+    Promise.reject();
     res.json(groups);
   }
 
@@ -15,12 +14,7 @@ export default class GroupController {
     const group = await GroupService.getById(id);
 
     if (!group) {
-      throw new APIError({
-        name: 'not found',
-        statusCode: httpStatusCode.NOT_FOUND,
-        isOperational: true,
-        description: `no group found by id: ${id}`
-      });
+      throw new HTTP404Error(`no group found by id: ${id}`);
     }
 
     res.send(group);
@@ -41,12 +35,7 @@ export default class GroupController {
     const isSuccess = await GroupService.update(id, groupDTO);
 
     if (!isSuccess) {
-      throw new APIError(
-        'not found',
-        httpStatusCode.NOT_FOUND,
-        true,
-        `no group found by id: ${id}`
-      );
+      throw new HTTP404Error(`no group found by id: ${id}`);
     }
 
     res.send({
@@ -60,12 +49,7 @@ export default class GroupController {
     const isSuccess = await GroupService.delete(id);
 
     if (!isSuccess) {
-      throw new APIError(
-        'not found',
-        httpStatusCode.NOT_FOUND,
-        true,
-        `no group found by id: ${id}`
-      );
+      throw new HTTP404Error(`no group found by id: ${id}`);
     }
 
     res.send({

@@ -31,8 +31,12 @@ const formatter = winston.format.combine(
   winston.format.printf((info) => {
     const { timestamp, level, message, ...meta } = info;
 
-    return `${timestamp} [${level}]: ${message} ${
-      Object.keys(meta).length ? JSON.stringify(meta, null, 2) : ''
+    return `${timestamp} [${level}]: ${message}${
+      meta?.stack
+        ? `
+      error.stack: ${JSON.stringify(meta.stack)}
+      `
+        : ''
     }`;
   })
 );
@@ -53,7 +57,12 @@ class Logger {
     this.#logger = winston.createLogger({
       level: isDev() ? 'debug' : 'warn',
       levels: customLevels.levels,
-      transports: [isDev() ? transport : prodTransport]
+      transports: [isDev() ? transport : prodTransport],
+      exceptionHandlers: [transport],
+      handleExceptions: true,
+      handleRejections: true,
+      humanReadableUnhandledException: true,
+      exitOnError: false
     });
 
     winston.addColors(customLevels.colors);
