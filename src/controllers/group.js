@@ -4,7 +4,7 @@ import HTTP404Error from '../errorHandler/HTTP404Error';
 export default class GroupController {
   static async getGroups(req, res) {
     const groups = await GroupService.getAll();
-    Promise.reject();
+
     res.json(groups);
   }
 
