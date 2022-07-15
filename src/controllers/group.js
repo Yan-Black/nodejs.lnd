@@ -1,5 +1,5 @@
 import GroupService from '../service/group';
-import { responseStatuses } from '../constants';
+import HTTP404Error from '../errorHandler/HTTP404Error';
 
 export default class GroupController {
   static async getGroups(req, res) {
@@ -13,11 +13,11 @@ export default class GroupController {
 
     const group = await GroupService.getById(id);
 
-    group
-      ? res.send(group)
-      : res
-          .status(responseStatuses.notFoundStatus)
-          .send(`no group found by id: ${id}`);
+    if (!group) {
+      throw new HTTP404Error(`no group found by id: ${id}`);
+    }
+
+    res.send(group);
   }
 
   static async createGroup(req, res) {
@@ -34,13 +34,13 @@ export default class GroupController {
 
     const isSuccess = await GroupService.update(id, groupDTO);
 
-    isSuccess
-      ? res.send({
-          message: 'Group was updated successfully.'
-        })
-      : res
-          .status(responseStatuses.notFoundStatus)
-          .send(`no group found by id: ${id}`);
+    if (!isSuccess) {
+      throw new HTTP404Error(`no group found by id: ${id}`);
+    }
+
+    res.send({
+      message: 'Group was updated successfully.'
+    });
   }
 
   static async deleteGroup(req, res) {
@@ -48,12 +48,12 @@ export default class GroupController {
 
     const isSuccess = await GroupService.delete(id);
 
-    isSuccess
-      ? res.send({
-          message: 'Group was deleted successfully!'
-        })
-      : res
-          .status(responseStatuses.notFoundStatus)
-          .send(`no group found by id: ${id}`);
+    if (!isSuccess) {
+      throw new HTTP404Error(`no group found by id: ${id}`);
+    }
+
+    res.send({
+      message: 'Group was deleted successfully.'
+    });
   }
 }
