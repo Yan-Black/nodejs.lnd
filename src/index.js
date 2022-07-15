@@ -19,5 +19,5 @@ app
   .use(errorHandler);
 
 app.listen(PORT, () => {
-  logger.http(`listening at http://localhost:${PORT}`);
+  logger.info(`listening at http://localhost:${PORT}`);
 });
