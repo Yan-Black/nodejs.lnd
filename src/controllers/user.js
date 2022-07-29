@@ -23,6 +23,30 @@ export default class UsersController {
     res.send(user);
   }
 
+  static async getAssociatedGroupsByUserId(req, res) {
+    const { id } = req.params;
+
+    const groups = await UsersService.getAssociatedGroups(id);
+
+    if (!groups) {
+      throw new HTTP404Error(`no groups found by user id: ${id}`);
+    }
+
+    res.send(groups);
+  }
+
+  static async getUserGroupsByUserId(req, res) {
+    const { id } = req.params;
+
+    const user = await UsersService.getById(id);
+
+    if (!user) {
+      throw new HTTP404Error(`no user found by id: ${id}`);
+    }
+
+    res.send(user);
+  }
+
   static async createUser(req, res) {
     const { body: userDTO } = req;
 

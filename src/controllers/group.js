@@ -1,5 +1,6 @@
 import GroupService from '../service/group';
 import HTTP404Error from '../errorHandler/HTTP404Error';
+import HTTP400Error from '../errorHandler/HTTP400Error';
 
 export default class GroupController {
   static async getGroups(req, res) {
@@ -18,6 +19,31 @@ export default class GroupController {
     }
 
     res.send(group);
+  }
+
+  static async getAssociatedUsersByUserId(req, res) {
+    const { id } = req.params;
+
+    const users = await GroupService.getAssociatedUsers(id);
+
+    if (!users) {
+      throw new HTTP404Error(`no groups found by user id: ${id}`);
+    }
+
+    res.send(users);
+  }
+
+  static async addUsersToGroup(req, res) {
+    const { id: groupId } = req.params;
+    const { users } = req.body;
+
+    const userGroup = await GroupService.addUsersToGroup(groupId, users);
+
+    if (!userGroup) {
+      throw new HTTP400Error();
+    }
+
+    res.json(userGroup);
   }
 
   static async createGroup(req, res) {

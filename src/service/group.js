@@ -1,6 +1,6 @@
 import { db } from '../database/models';
 
-const { Group } = db;
+const { Group, UserGroup, sequelize } = db;
 
 export default class GroupService {
   static async getAll() {
@@ -13,6 +13,40 @@ export default class GroupService {
     const user = await Group.findByPk(id);
 
     return user;
+  }
+
+  static async getAssociatedUsers(id) {
+    const group = await Group.findByPk(id);
+
+    if (!group) {
+      return null;
+    }
+
+    const users = await group.getUsers();
+
+    if (!users) {
+      return null;
+    }
+
+    return users;
+  }
+
+  static async addUsersToGroup(groupId, userIds) {
+    const userGroup = await sequelize.transaction(async (transaction) => {
+      return Promise.all(
+        userIds.map((userId) =>
+          UserGroup.create(
+            {
+              GroupId: groupId,
+              UserId: userId
+            },
+            { transaction }
+          )
+        )
+      );
+    });
+
+    return userGroup;
   }
 
   static async create(groupDTO) {

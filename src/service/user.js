@@ -1,24 +1,10 @@
 import { db } from '../database/models';
 
-const { User, UserGroup, sequelize } = db;
+const { User } = db;
 const { Op } = db.Sequelize;
 const attributes = { exclude: ['createdAt', 'updatedAt', 'deletedAt'] };
 
 export default class UsersService {
-  static async addUsersToGroup(groupId, userIds) {
-    await sequelize.transaction(async (transaction) => {
-      (Array.isArray(userIds) ? userIds : [userIds]).forEach(async (userId) => {
-        await UserGroup.create(
-          {
-            groupId,
-            userId
-          },
-          { transaction }
-        );
-      });
-    });
-  }
-
   static async getAll(loginSubstring = '', limit = 10, offset = 0) {
     const users = await User.findAll({
       attributes,
@@ -36,6 +22,22 @@ export default class UsersService {
     });
 
     return user;
+  }
+
+  static async getAssociatedGroups(id) {
+    const user = await User.findByPk(id);
+
+    if (!user) {
+      return null;
+    }
+
+    const groups = await user.getGroups();
+
+    if (!groups) {
+      return null;
+    }
+
+    return groups;
   }
 
   static async create(userDTO) {

@@ -1,7 +1,7 @@
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable('UserGroups', {
-      userId: {
+      UserId: {
         primaryKey: true,
         type: Sequelize.UUID,
         references: {
@@ -10,7 +10,7 @@ module.exports = {
         },
         onDelete: 'CASCADE'
       },
-      groupId: {
+      GroupId: {
         primaryKey: true,
         type: Sequelize.UUID,
         references: {
