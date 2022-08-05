@@ -22,7 +22,6 @@ groupsRouter
   .get('/:id/users', authenticate, getAssociatedUsersByGroupId)
   .post('/', authenticate, joiValidate(groupSchema), createGroup)
   .put('/:id', authenticate, joiValidate(groupSchema), updateGroup)
-  .put('/:id/users', authenticate, addUsersToGroup)
   .put('/:groupId/users/:userId', authenticate, addUsersToGroup)
   .delete('/:id', authenticate, deleteGroup)
   .delete('/:groupId/users/:userId', authenticate, deleteUserFromAGroup);
