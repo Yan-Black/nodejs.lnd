@@ -29,22 +29,20 @@ export default class UsersController {
     const groups = await UsersService.getAssociatedGroups(id);
 
     if (!groups) {
-      throw new HTTP404Error(`no groups found by user id: ${id}`);
+      throw new HTTP404Error(
+        `no associated groups found for user with id: ${id}`
+      );
     }
 
     res.send(groups);
   }
 
-  static async getUserGroupsByUserId(req, res) {
-    const { id } = req.params;
+  static async addGroupToAUser(req, res) {
+    const { userId, groupId } = req.params;
 
-    const user = await UsersService.getById(id);
+    const userGroup = await UsersService.addGroup(userId, groupId);
 
-    if (!user) {
-      throw new HTTP404Error(`no user found by id: ${id}`);
-    }
-
-    res.send(user);
+    res.json(userGroup);
   }
 
   static async createUser(req, res) {
@@ -65,9 +63,7 @@ export default class UsersController {
       throw new HTTP404Error(`no user found by id: ${id}`);
     }
 
-    res.send({
-      message: 'User was updated successfully.'
-    });
+    res.send('User was updated successfully.');
   }
 
   static async softDeleteUser(req, res) {
@@ -79,8 +75,20 @@ export default class UsersController {
       throw new HTTP404Error(`no user found by id: ${id}`);
     }
 
-    res.send({
-      message: 'User was deleted successfully.'
-    });
+    res.send('User was deleted successfully.');
+  }
+
+  static async deleteGroupFromUser(req, res) {
+    const { userId, groupId } = req.params;
+
+    const isSuccess = await UsersService.removeGroup(userId, groupId);
+
+    if (!isSuccess) {
+      throw new HTTP404Error(
+        `no user group relation found\n user id: ${userId}\n group id: ${groupId}`
+      );
+    }
+
+    res.send(`Group was successfully detached from a user with id:${userId}.`);
   }
 }

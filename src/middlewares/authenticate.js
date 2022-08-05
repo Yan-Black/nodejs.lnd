@@ -6,17 +6,18 @@ const { JWT_SECRET } = process.env;
 
 export const authenticate = (req, res, next) => {
   const bearerHeader = req.headers.authorization;
-  const token = bearerHeader?.split(' ')[1];
 
-  if (token) {
-    jwt.verify(token, JWT_SECRET, (err) => {
-      if (err) {
-        throw new HTTP403Error('forbidden');
-      } else {
-        next();
-      }
-    });
-  } else {
+  if (!bearerHeader) {
     throw new HTTP401Error('unauthorized');
   }
+
+  const token = bearerHeader.split(' ')[1];
+
+  jwt.verify(token, JWT_SECRET, (err) => {
+    if (err) {
+      throw new HTTP403Error('forbidden');
+    } else {
+      next();
+    }
+  });
 };

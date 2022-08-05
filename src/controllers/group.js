@@ -1,6 +1,5 @@
 import GroupService from '../service/group';
 import HTTP404Error from '../errorHandler/HTTP404Error';
-import HTTP400Error from '../errorHandler/HTTP400Error';
 
 export default class GroupController {
   static async getGroups(req, res) {
@@ -21,27 +20,23 @@ export default class GroupController {
     res.send(group);
   }
 
-  static async getAssociatedUsersByUserId(req, res) {
+  static async getAssociatedUsersByGroupId(req, res) {
     const { id } = req.params;
 
     const users = await GroupService.getAssociatedUsers(id);
 
     if (!users) {
-      throw new HTTP404Error(`no groups found by user id: ${id}`);
+      throw new HTTP404Error(`no users found for group with id: ${id}`);
     }
 
     res.send(users);
   }
 
   static async addUsersToGroup(req, res) {
-    const { id: groupId } = req.params;
+    const { groupId, userId } = req.params;
     const { users } = req.body;
 
-    const userGroup = await GroupService.addUsersToGroup(groupId, users);
-
-    if (!userGroup) {
-      throw new HTTP400Error();
-    }
+    const userGroup = await GroupService.addUser(groupId, users || userId);
 
     res.json(userGroup);
   }
@@ -64,9 +59,7 @@ export default class GroupController {
       throw new HTTP404Error(`no group found by id: ${id}`);
     }
 
-    res.send({
-      message: 'Group was updated successfully.'
-    });
+    res.send('Group was updated successfully.');
   }
 
   static async deleteGroup(req, res) {
@@ -78,8 +71,20 @@ export default class GroupController {
       throw new HTTP404Error(`no group found by id: ${id}`);
     }
 
-    res.send({
-      message: 'Group was deleted successfully.'
-    });
+    res.send('Group was deleted successfully.');
+  }
+
+  static async deleteUserFromAGroup(req, res) {
+    const { userId, groupId } = req.params;
+
+    const isSuccess = await GroupService.removeUser(groupId, userId);
+
+    if (!isSuccess) {
+      throw new HTTP404Error(
+        `no user group relation found\n user id: ${userId}\n group id: ${groupId}`
+      );
+    }
+
+    res.send(`User was successfully removed from a group with id:${groupId}.`);
   }
 }

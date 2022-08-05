@@ -1,16 +1,42 @@
+import { Sequelize } from 'sequelize';
 import BaseError from '../BaseError';
 import { logger } from '../../logger';
+import { httpStatusCode } from '../../constants';
 
-export default class ErrorHandler {
-  static handleError(err) {
-    logger.error('centralized error-handler message:', err);
-  }
+class ErrorHandler {
+  responseMessage;
 
-  static isOperational(error) {
-    if (error instanceof BaseError) {
-      return error.isOperational;
+  statusCode;
+
+  #isOpError = false;
+
+  handleError(error) {
+    if (error instanceof Sequelize.ValidationError) {
+      this.handleSequelizeValidationError(error);
+      return;
     }
 
-    return false;
+    logger.error('centralized error-handler message:', error);
+  }
+
+  handleSequelizeValidationError(error) {
+    this.responseMessage = error.parent.detail;
+    this.statusCode = httpStatusCode.BAD_REQUEST;
+
+    logger.error(
+      `centralized error-handler message: ${this.responseMessage}`,
+      error.parent
+    );
+  }
+
+  isOperational(error) {
+    if (error instanceof BaseError) {
+      this.#isOpError = error.isOperational;
+      return this.#isOpError;
+    }
+
+    return this.#isOpError;
   }
 }
+
+export const centralizedHandler = new ErrorHandler();

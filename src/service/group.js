@@ -31,10 +31,10 @@ export default class GroupService {
     return users;
   }
 
-  static async addUsersToGroup(groupId, userIds) {
-    const userGroup = await sequelize.transaction(async (transaction) => {
-      return Promise.all(
-        userIds.map((userId) =>
+  static async addUser(groupId, userIds) {
+    const transactionCallBack = (transaction) => {
+      const transactions = (Array.isArray(userIds) ? userIds : [userIds]).map(
+        (userId) =>
           UserGroup.create(
             {
               GroupId: groupId,
@@ -42,11 +42,37 @@ export default class GroupService {
             },
             { transaction }
           )
-        )
       );
-    });
+
+      return Promise.all(transactions);
+    };
+
+    const userGroup = await sequelize.transaction(transactionCallBack);
 
     return userGroup;
+  }
+
+  static async removeUser(groupId, userIds) {
+    const transactionCallBack = (transaction) => {
+      const transactions = (Array.isArray(userIds) ? userIds : [userIds]).map(
+        (userId) =>
+          UserGroup.destroy(
+            {
+              where: {
+                GroupId: groupId,
+                UserId: userId
+              }
+            },
+            { transaction }
+          )
+      );
+
+      return Promise.all(transactions);
+    };
+
+    const [result] = await sequelize.transaction(transactionCallBack);
+
+    return Boolean(result);
   }
 
   static async create(groupDTO) {

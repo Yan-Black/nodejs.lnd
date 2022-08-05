@@ -14,7 +14,7 @@ app
   .use(cors())
   .use(express.json())
   .use(logRequest(logger))
-  // .use('/api/v1/login', loginRouter)
+  .use('/api/v1/login', loginRouter)
   .use('/api/v1/users', usersRouter)
   .use('/api/v1/groups', groupsRouter)
   .use(errorHandler);

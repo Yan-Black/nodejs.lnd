@@ -1,6 +1,6 @@
 import { db } from '../database/models';
 
-const { User } = db;
+const { User, UserGroup, sequelize } = db;
 const { Op } = db.Sequelize;
 const attributes = { exclude: ['createdAt', 'updatedAt', 'deletedAt'] };
 
@@ -38,6 +38,52 @@ export default class UsersService {
     }
 
     return groups;
+  }
+
+  static async addGroup(userId, groupIds) {
+    const transactionCallBack = (transaction) => {
+      const transactions = (
+        Array.isArray(groupIds) ? groupIds : [groupIds]
+      ).map((groupId) =>
+        UserGroup.create(
+          {
+            GroupId: groupId,
+            UserId: userId
+          },
+          { transaction }
+        )
+      );
+
+      return Promise.all(transactions);
+    };
+
+    const userGroup = await sequelize.transaction(transactionCallBack);
+
+    return userGroup;
+  }
+
+  static async removeGroup(userId, groupIds) {
+    const transactionCallBack = (transaction) => {
+      const transactions = (
+        Array.isArray(groupIds) ? groupIds : [groupIds]
+      ).map((groupId) =>
+        UserGroup.destroy(
+          {
+            where: {
+              GroupId: groupId,
+              UserId: userId
+            }
+          },
+          { transaction }
+        )
+      );
+
+      return Promise.all(transactions);
+    };
+
+    const [result] = await sequelize.transaction(transactionCallBack);
+
+    return Boolean(result);
   }
 
   static async create(userDTO) {

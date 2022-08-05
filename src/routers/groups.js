@@ -6,22 +6,25 @@ import { groupSchema } from '../validation';
 const {
   getGroups,
   getGroupById,
-  getAssociatedUsersByUserId,
+  getAssociatedUsersByGroupId,
   addUsersToGroup,
   createGroup,
   updateGroup,
-  deleteGroup
+  deleteGroup,
+  deleteUserFromAGroup
 } = GroupController;
 
 const groupsRouter = express.Router();
 
 groupsRouter
-  .get('/', getGroups)
-  .get('/:id', getGroupById)
-  .get('/:id/users', getAssociatedUsersByUserId)
-  .post('/', joiValidate(groupSchema), createGroup)
-  .put('/:id', joiValidate(groupSchema), updateGroup)
-  .put('/:id/users', addUsersToGroup)
-  .delete('/:id', deleteGroup);
+  .get('/', authenticate, getGroups)
+  .get('/:id', authenticate, getGroupById)
+  .get('/:id/users', authenticate, getAssociatedUsersByGroupId)
+  .post('/', authenticate, joiValidate(groupSchema), createGroup)
+  .put('/:id', authenticate, joiValidate(groupSchema), updateGroup)
+  .put('/:id/users', authenticate, addUsersToGroup)
+  .put('/:groupId/users/:userId', authenticate, addUsersToGroup)
+  .delete('/:id', authenticate, deleteGroup)
+  .delete('/:groupId/users/:userId', authenticate, deleteUserFromAGroup);
 
 export { groupsRouter };
