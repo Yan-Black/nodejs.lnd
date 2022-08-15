@@ -6,6 +6,7 @@ import { groupSchema } from '../validation';
 const {
   getGroups,
   getGroupById,
+  getAssociatedUser,
   getAssociatedUsersByGroupId,
   addUsersToGroup,
   createGroup,
@@ -20,10 +21,16 @@ groupsRouter
   .get('/', authenticate, getGroups)
   .get('/:id', authenticate, getGroupById)
   .get('/:id/users', authenticate, getAssociatedUsersByGroupId)
+  .get('/:groupId/users/:userId', authenticate, getAssociatedUser)
+
   .post('/', authenticate, joiValidate(groupSchema), createGroup)
+
   .put('/:id', authenticate, joiValidate(groupSchema), updateGroup)
+  .put('/:groupId/users', authenticate, addUsersToGroup)
   .put('/:groupId/users/:userId', authenticate, addUsersToGroup)
+
   .delete('/:id', authenticate, deleteGroup)
+  .delete('/:groupId/users', authenticate, deleteUserFromAGroup)
   .delete('/:groupId/users/:userId', authenticate, deleteUserFromAGroup);
 
 export { groupsRouter };

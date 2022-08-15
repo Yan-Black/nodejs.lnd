@@ -5,7 +5,8 @@ import HTTP403Error from '../errorHandler/HTTP403Error';
 const { JWT_SECRET } = process.env;
 
 export const authenticate = (req, res, next) => {
-  const bearerHeader = req.headers.authorization;
+  // next();
+  const { authorization: bearerHeader } = req.headers;
 
   if (!bearerHeader) {
     throw new HTTP401Error('unauthorized');

@@ -16,6 +16,9 @@ class ErrorHandler {
       return;
     }
 
+    this.responseMessage = error.message || httpStatusCode.INTERNAL_SERVER;
+    this.statusCode = error.statusCode || 'internal server';
+
     logger.error('centralized error-handler message:', error);
   }
 

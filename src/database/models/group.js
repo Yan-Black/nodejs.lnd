@@ -5,7 +5,11 @@ export default (sequelize, DataTypes) => {
     static associate(models) {
       Group.belongsToMany(models.User, {
         through: models.UserGroup,
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE',
+        as: {
+          plural: 'users',
+          singular: 'user'
+        }
       });
     }
   }
@@ -19,7 +23,7 @@ export default (sequelize, DataTypes) => {
         defaultValue: DataTypes.UUIDV4
       },
       name: DataTypes.STRING,
-      permission: DataTypes.ARRAY(DataTypes.STRING)
+      permissions: DataTypes.ARRAY(DataTypes.STRING)
     },
     {
       sequelize,

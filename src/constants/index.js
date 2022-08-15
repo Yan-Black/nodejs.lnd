@@ -8,5 +8,6 @@ export const httpStatusCode = {
   UNAUTHORIZED: 401,
   FORBIDDEN: 403,
   NOT_FOUND: 404,
+  GONE: 410,
   INTERNAL_SERVER: 500
 };

@@ -19,7 +19,7 @@ export default class LoginService {
 
     if (user) {
       const token = jwt.sign({ id: user.getDataValue('id') }, JWT_SECRET, {
-        expiresIn: 600
+        expiresIn: 6000
       });
 
       return token;

@@ -1,14 +1,22 @@
 import { db } from '../database/models';
 
-const { User, UserGroup, sequelize } = db;
+const { User, Group, sequelize } = db;
 const { Op } = db.Sequelize;
-const attributes = { exclude: ['createdAt', 'updatedAt', 'deletedAt'] };
 
 export default class UsersService {
+  static excludeAttributes = {
+    attributes: { exclude: ['createdAt', 'updatedAt', 'deletedAt'] }
+  };
+
+  static associate = {
+    include: [{ model: Group, as: 'groups', through: { attributes: [] } }]
+  };
+
   static async getAll(loginSubstring = '', limit = 10, offset = 0) {
     const users = await User.findAll({
-      attributes,
-      where: { login: { [Op.iLike]: `%${loginSubstring}` } },
+      ...UsersService.excludeAttributes,
+      ...UsersService.associate,
+      where: { login: { [Op.iLike]: `%${loginSubstring}%` } },
       limit,
       offset
     });
@@ -18,10 +26,40 @@ export default class UsersService {
 
   static async getById(id) {
     const user = await User.findByPk(id, {
-      attributes
+      ...UsersService.excludeAttributes,
+      ...UsersService.associate
     });
 
     return user;
+  }
+
+  static async getAssociatedGroup(userId, groupId) {
+    const user = await User.findByPk(userId);
+
+    if (!user) {
+      return null;
+    }
+
+    const group = await Group.findByPk(groupId, {
+      include: {
+        model: User,
+        as: 'users',
+        through: { attributes: [] },
+        ...UsersService.excludeAttributes
+      }
+    });
+
+    if (!group) {
+      return null;
+    }
+
+    const hasGroup = user.hasGroup(group);
+
+    if (hasGroup) {
+      return group;
+    }
+
+    return null;
   }
 
   static async getAssociatedGroups(id) {
@@ -31,7 +69,7 @@ export default class UsersService {
       return null;
     }
 
-    const groups = await user.getGroups();
+    const groups = await user.getGroups({ joinTableAttributes: [] });
 
     if (!groups) {
       return null;
@@ -40,69 +78,124 @@ export default class UsersService {
     return groups;
   }
 
-  static async addGroup(userId, groupIds) {
-    const transactionCallBack = (transaction) => {
-      const transactions = (
+  static async addGroups(userId, groupIds) {
+    const addGroupsTransaction = (transaction) => {
+      const dbTransactionPromises = (
         Array.isArray(groupIds) ? groupIds : [groupIds]
-      ).map((groupId) =>
-        UserGroup.create(
-          {
-            GroupId: groupId,
-            UserId: userId
-          },
-          { transaction }
-        )
-      );
+      ).map(async (groupId) => {
+        const user = await User.findByPk(userId, {
+          ...UsersService.excludeAttributes,
+          ...UsersService.associate,
+          transaction
+        });
 
-      return Promise.all(transactions);
+        if (!user) {
+          return null;
+        }
+
+        const group = await Group.findByPk(groupId, { transaction });
+
+        if (!group) {
+          return null;
+        }
+
+        const hasGroup = await user.hasGroup(group, { transaction });
+
+        if (hasGroup) {
+          return user;
+        }
+
+        await user.addGroup(group, { transaction });
+        await user.reload({ ...UsersService.excludeAttributes, transaction });
+
+        return user;
+      });
+
+      return Promise.all(dbTransactionPromises);
     };
 
-    const userGroup = await sequelize.transaction(transactionCallBack);
+    const results = await sequelize.transaction(addGroupsTransaction);
+    const [user] = results.filter(Boolean).reverse();
 
-    return userGroup;
+    if (user) {
+      const groups = user.getGroups({ joinTableAttributes: [] });
+      return groups;
+    }
+
+    return [];
   }
 
-  static async removeGroup(userId, groupIds) {
-    const transactionCallBack = (transaction) => {
-      const transactions = (
-        Array.isArray(groupIds) ? groupIds : [groupIds]
-      ).map((groupId) =>
-        UserGroup.destroy(
-          {
-            where: {
-              GroupId: groupId,
-              UserId: userId
-            }
-          },
-          { transaction }
-        )
-      );
+  static async removeGroup(userId, groupId) {
+    const removeGroupTransaction = async (transaction) => {
+      const user = await User.findByPk(userId, {
+        transaction
+      });
 
-      return Promise.all(transactions);
+      if (!user) {
+        return null;
+      }
+
+      if (groupId) {
+        const group = await Group.findByPk(groupId, { transaction });
+
+        if (!group) {
+          return null;
+        }
+
+        const result = await user.removeGroup(group, { transaction });
+        return Boolean(result);
+      }
+
+      const userGroups = await user.getGroups({ transaction });
+      const result = await user.removeGroups(userGroups, { transaction });
+
+      return Boolean(result);
     };
 
-    const [result] = await sequelize.transaction(transactionCallBack);
-
-    return Boolean(result);
+    const result = await sequelize.transaction(removeGroupTransaction);
+    return result;
   }
 
   static async create(userDTO) {
-    const {
-      dataValues: { id }
-    } = await User.create(userDTO);
+    const [user] = await User.findOrCreate({
+      where: {
+        ...userDTO
+      },
+      ...UsersService.excludeAttributes
+    });
 
-    return id;
+    return user;
   }
 
   static async update(id, userDTO) {
-    const [num] = await User.update(userDTO, { where: { id } });
+    const user = await User.findByPk(id, {
+      ...UsersService.excludeAttributes,
+      ...UsersService.associate
+    });
 
-    return num === 1;
+    if (!user) {
+      return null;
+    }
+
+    await User.update(userDTO, {
+      where: { id }
+    });
+    await user.reload({
+      ...UsersService.excludeAttributes,
+      ...UsersService.associate
+    });
+
+    return user;
   }
 
   static async delete(id) {
-    const num = await User.destroy({ where: { id } });
+    const user = await User.findByPk(id);
 
-    return num === 1;
+    if (!user) {
+      return null;
+    }
+
+    const result = await User.destroy({ where: { id } });
+    return Boolean(result);
   }
 }

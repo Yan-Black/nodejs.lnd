@@ -5,7 +5,11 @@ export default (sequelize, DataTypes) => {
     static associate(models) {
       User.belongsToMany(models.Group, {
         through: models.UserGroup,
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE',
+        as: {
+          plural: 'groups',
+          singular: 'group'
+        }
       });
     }
   }
