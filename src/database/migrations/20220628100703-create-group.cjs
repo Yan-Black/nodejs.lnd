@@ -10,7 +10,7 @@ module.exports = {
       name: {
         type: Sequelize.STRING
       },
-      permission: {
+      permissions: {
         type: Sequelize.ARRAY(Sequelize.STRING)
       }
     });

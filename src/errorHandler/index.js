@@ -1,14 +1,13 @@
-import ErrorHandler from './CentralizedHandler';
-import { httpStatusCode } from '../constants';
+import { centralizedHandler } from './CentralizedHandler';
 
 export const errorHandler = (err, req, res, next) => {
-  if (!ErrorHandler.isOperational(err)) {
+  if (!centralizedHandler.isOperational(err)) {
     next(err);
   }
 
-  ErrorHandler.handleError(err);
+  centralizedHandler.handleError(err);
 
   res
-    .status(err.statusCode || httpStatusCode.INTERNAL_SERVER)
-    .send(err.message);
+    .status(centralizedHandler.statusCode)
+    .send(centralizedHandler.responseMessage);
 };
