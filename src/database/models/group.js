@@ -6,6 +6,7 @@ export default (sequelize, DataTypes) => {
       Group.belongsToMany(models.User, {
         through: models.UserGroup,
         onDelete: 'CASCADE',
+        hooks: true,
         as: {
           plural: 'users',
           singular: 'user'

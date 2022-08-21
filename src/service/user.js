@@ -1,6 +1,6 @@
 import { db } from '../database/models';
 
-const { User, Group, sequelize } = db;
+const { User, Group, UserGroup, sequelize } = db;
 const { Op } = db.Sequelize;
 
 export default class UsersService {
@@ -135,15 +135,28 @@ export default class UsersService {
         return null;
       }
 
-      if (groupId) {
-        const group = await Group.findByPk(groupId, { transaction });
+      const group = await Group.findByPk(groupId, { transaction });
 
-        if (!group) {
-          return null;
-        }
+      if (!group) {
+        return null;
+      }
 
-        const result = await user.removeGroup(group, { transaction });
-        return Boolean(result);
+      const result = await user.removeGroup(group, { transaction });
+      return Boolean(result);
+    };
+
+    const result = await sequelize.transaction(removeGroupTransaction);
+    return result;
+  }
+
+  static async removeGroups(userId) {
+    const removeGroupsTransaction = async (transaction) => {
+      const user = await User.findByPk(userId, {
+        transaction
+      });
+
+      if (!user) {
+        return null;
       }
 
       const userGroups = await user.getGroups({ transaction });
@@ -152,19 +165,21 @@ export default class UsersService {
       return Boolean(result);
     };
 
-    const result = await sequelize.transaction(removeGroupTransaction);
+    const result = await sequelize.transaction(removeGroupsTransaction);
     return result;
   }
 
   static async create(userDTO) {
-    const [user] = await User.findOrCreate({
+    const [user, created] = await User.findOrCreate({
       where: {
-        ...userDTO
+        ...(userDTO.id && { id: userDTO.id })
       },
-      ...UsersService.excludeAttributes
+      defaults: {
+        ...userDTO
+      }
     });
 
-    return user;
+    return created ? user : null;
   }
 
   static async update(id, userDTO) {
@@ -189,13 +204,32 @@ export default class UsersService {
   }
 
   static async delete(id) {
-    const user = await User.findByPk(id);
+    const deleteUserTransaction = async (transaction) => {
+      const user = await User.findByPk(id, { transaction });
 
-    if (!user) {
-      return null;
-    }
+      if (!user) {
+        return null;
+      }
 
-    const result = await User.destroy({ where: { id } });
-    return Boolean(result);
+      const result = await User.destroy({
+        where: { id },
+        transaction
+      });
+      /* Manual joint table record deletion.
+      Not supported in Sequilize for paranoid tables. */
+      if (result) {
+        await UserGroup.destroy({
+          where: {
+            UserId: id
+          },
+          transaction
+        });
+      }
+
+      return Boolean(result);
+    };
+
+    const result = sequelize.transaction(deleteUserTransaction);
+    return result;
   }
 }

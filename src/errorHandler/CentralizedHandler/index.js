@@ -10,9 +10,16 @@ class ErrorHandler {
 
   #isOpError = false;
 
+  meta = {};
+
   handleError(error) {
+    if (error.name === 'SequelizeDatabaseError') {
+      this.#handleSequilizeDatabaseError(error);
+      return;
+    }
+
     if (error instanceof Sequelize.ValidationError) {
-      this.handleSequelizeValidationError(error);
+      this.#handleSequelizeValidationError(error);
       return;
     }
 
@@ -22,7 +29,14 @@ class ErrorHandler {
     logger.error('centralized error-handler message:', error);
   }
 
-  handleSequelizeValidationError(error) {
+  #handleSequilizeDatabaseError(error) {
+    this.responseMessage = error.message;
+    this.statusCode = httpStatusCode.BAD_REQUEST;
+
+    logger.error('centralized error-handler message:', error);
+  }
+
+  #handleSequelizeValidationError(error) {
     this.responseMessage = error.parent.detail;
     this.statusCode = httpStatusCode.BAD_REQUEST;
 

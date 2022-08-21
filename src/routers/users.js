@@ -12,6 +12,7 @@ const {
   updateUser,
   addGroupsToAUser,
   softDeleteUser,
+  deleteGroupsFromUser,
   deleteGroupFromUser
 } = UsersController;
 
@@ -30,7 +31,7 @@ usersRouter
   .put('/:userId/groups/:groupId', authenticate, addGroupsToAUser)
 
   .delete('/:id', authenticate, softDeleteUser)
-  .delete('/:userId/groups', authenticate, deleteGroupFromUser)
+  .delete('/:userId/groups', authenticate, deleteGroupsFromUser)
   .delete('/:userId/groups/:groupId', authenticate, deleteGroupFromUser);
 
 export { usersRouter };

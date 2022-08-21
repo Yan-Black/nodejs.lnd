@@ -12,6 +12,7 @@ const {
   createGroup,
   updateGroup,
   deleteGroup,
+  deleteUsersFromAGroup,
   deleteUserFromAGroup
 } = GroupController;
 
@@ -30,7 +31,7 @@ groupsRouter
   .put('/:groupId/users/:userId', authenticate, addUsersToGroup)
 
   .delete('/:id', authenticate, deleteGroup)
-  .delete('/:groupId/users', authenticate, deleteUserFromAGroup)
+  .delete('/:groupId/users', authenticate, deleteUsersFromAGroup)
   .delete('/:groupId/users/:userId', authenticate, deleteUserFromAGroup);
 
 export { groupsRouter };

@@ -141,15 +141,28 @@ export default class GroupService {
         return null;
       }
 
-      if (userId) {
-        const user = await User.findByPk(userId, { transaction });
+      const user = await User.findByPk(userId, { transaction });
 
-        if (!user) {
-          return null;
-        }
+      if (!user) {
+        return null;
+      }
 
-        const result = await group.removeUser(user, { transaction });
-        return Boolean(result);
+      const result = await group.removeUser(user, { transaction });
+      return Boolean(result);
+    };
+
+    const result = await sequelize.transaction(removeUserTransaction);
+    return result;
+  }
+
+  static async removeUsers(groupId) {
+    const removeUsersTransaction = async (transaction) => {
+      const group = await Group.findByPk(groupId, {
+        transaction
+      });
+
+      if (!group) {
+        return null;
       }
 
       const groupUsers = await group.getUsers({ transaction });
@@ -158,18 +171,22 @@ export default class GroupService {
       return Boolean(result);
     };
 
-    const result = await sequelize.transaction(removeUserTransaction);
+    const result = await sequelize.transaction(removeUsersTransaction);
     return result;
   }
 
   static async create(groupDTO) {
-    const [group] = await Group.findOrCreate({
+    const [group, created] = await Group.findOrCreate({
       where: {
+        ...(groupDTO.id && { id: groupDTO.id }),
+        ...(groupDTO.name && { name: groupDTO.name })
+      },
+      defaults: {
         ...groupDTO
       }
     });
 
-    return group;
+    return created ? group : null;
   }
 
   static async update(id, groupDTO) {
