@@ -3,14 +3,35 @@ import BaseError from '../BaseError';
 import { logger } from '../../logger';
 import { httpStatusCode } from '../../constants';
 
-class ErrorHandler {
+export default class ErrorHandler {
   responseMessage;
 
   statusCode;
 
-  #isOpError = false;
+  details;
 
   meta = {};
+
+  static errorPrefix = 'centralized error-handler message:';
+
+  #setErrorInfo(message, status, details) {
+    this.responseMessage = message;
+    this.statusCode = status;
+    this.details = details;
+  }
+
+  #handleSequilizeDatabaseError(error) {
+    this.#setErrorInfo(error.message, httpStatusCode.BAD_REQUEST, {});
+    logger.error(ErrorHandler.errorPrefix, error);
+  }
+
+  #handleSequelizeValidationError(error) {
+    this.#setErrorInfo(error.parent.detail, httpStatusCode.BAD_REQUEST, {});
+    logger.error(
+      `${ErrorHandler.errorPrefix} ${this.responseMessage}`,
+      error.parent
+    );
+  }
 
   handleError(error) {
     if (error.name === 'SequelizeDatabaseError') {
@@ -23,36 +44,21 @@ class ErrorHandler {
       return;
     }
 
-    this.responseMessage = error.message || httpStatusCode.INTERNAL_SERVER;
-    this.statusCode = error.statusCode || 'internal server';
-
-    logger.error('centralized error-handler message:', error);
-  }
-
-  #handleSequilizeDatabaseError(error) {
-    this.responseMessage = error.message;
-    this.statusCode = httpStatusCode.BAD_REQUEST;
-
-    logger.error('centralized error-handler message:', error);
-  }
-
-  #handleSequelizeValidationError(error) {
-    this.responseMessage = error.parent.detail;
-    this.statusCode = httpStatusCode.BAD_REQUEST;
-
-    logger.error(
-      `centralized error-handler message: ${this.responseMessage}`,
-      error.parent
+    this.#setErrorInfo(
+      error.message || 'internal server',
+      error.statusCode || httpStatusCode.INTERNAL_SERVER,
+      error.details
     );
+
+    logger.error(ErrorHandler.errorPrefix, error);
   }
 
-  isOperational(error) {
+  static isOperational(error) {
     if (error instanceof BaseError) {
-      this.#isOpError = error.isOperational;
-      return this.#isOpError;
+      return error.isOperational;
     }
 
-    return this.#isOpError;
+    return false;
   }
 }
 

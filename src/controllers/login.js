@@ -1,5 +1,6 @@
 import LoginService from '../service/login';
 import HTTP400Error from '../errorHandler/HTTP400Error';
+import { responseBuilder } from '../helpers/ResponseBuilder';
 
 export default class LoginController {
   static async getJWT(req, res) {
@@ -11,6 +12,7 @@ export default class LoginController {
       throw new HTTP400Error('invalid username or password');
     }
 
-    res.json({ token });
+    const response = responseBuilder.createResponse({ token });
+    res.json(response);
   }
 }

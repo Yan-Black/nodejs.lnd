@@ -1,11 +1,10 @@
-export const getJoiErrorResponse = (errorDetails = []) => {
+export const getJoiErrorDetails = (errorDetails = []) => {
   const errors = errorDetails.map(({ path: [key], message }) => ({
     key,
     message
   }));
 
   return {
-    status: 'failed',
     errors
   };
 };
