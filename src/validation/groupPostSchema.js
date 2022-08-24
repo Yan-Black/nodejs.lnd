@@ -1,8 +1,13 @@
 import joi from 'joi';
 import { permissions } from '../constants';
 
-const groupSchema = joi.object({
-  id: joi.string().optional(),
+const groupPostSchema = joi.object({
+  id: joi
+    .string()
+    .guid({
+      version: 'uuidv4'
+    })
+    .optional(),
   name: joi.string().min(3).max(30).required(),
   permissions: joi
     .array()
@@ -10,4 +15,4 @@ const groupSchema = joi.object({
     .required()
 });
 
-export { groupSchema };
+export { groupPostSchema };

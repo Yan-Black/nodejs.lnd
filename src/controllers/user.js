@@ -17,52 +17,14 @@ export default class UsersController {
   }
 
   static async getUserById(req, res) {
-    const { id } = req.params;
-    const user = await UsersService.getById(id);
+    const { userId } = req.params;
+    const user = await UsersService.getById(userId);
 
     if (!user) {
-      throw new HTTP404Error(`no user found by id: ${id}`);
+      throw new HTTP404Error('user not found', { userId });
     }
 
     const response = responseBuilder.createResponse(user);
-    res.json(response);
-  }
-
-  static async getAssociatedGroup(req, res) {
-    const { userId, groupId } = req.params;
-    const group = await UsersService.getAssociatedGroup(userId, groupId);
-
-    if (!group) {
-      throw new HTTP404Error(
-        `group with id: ${userId} or user with id: ${groupId} not found`
-      );
-    }
-
-    const response = responseBuilder.createResponse(group);
-    res.json(response);
-  }
-
-  static async getAssociatedGroupsByUserId(req, res) {
-    const { id } = req.params;
-    const groups = await UsersService.getAssociatedGroups(id);
-
-    if (!groups) {
-      throw new HTTP404Error(
-        `no associated groups found for user with id: ${id} or this user doesn't exist`
-      );
-    }
-
-    const response = responseBuilder.createResponse(groups);
-    res.json(response);
-  }
-
-  static async addGroupsToAUser(req, res) {
-    const { userId, groupId } = req.params;
-    const { groupIds } = req.body;
-
-    const groups = await UsersService.addGroups(userId, groupIds || groupId);
-
-    const response = responseBuilder.createResponse(groups);
     res.json(response);
   }
 
@@ -71,20 +33,20 @@ export default class UsersController {
     const user = await UsersService.create(userDTO);
 
     if (!user) {
-      throw new HTTP400Error('entity already exists');
+      throw new HTTP400Error('user already exists');
     }
 
     const response = responseBuilder.createResponse(user);
-    res.json(response);
+    res.status(httpStatusCode.OK_NEW_RESOURCE_CREATED).json(response);
   }
 
   static async updateUser(req, res) {
-    const { id } = req.params;
+    const { userId } = req.params;
     const { body: userDTO } = req;
-    const user = await UsersService.update(id, userDTO);
+    const user = await UsersService.update(userId, userDTO);
 
     if (!user) {
-      throw new HTTP404Error(`no user found by id: ${id}`);
+      throw new HTTP404Error('user not found', { userId });
     }
 
     const response = responseBuilder.createResponse(user);
@@ -92,41 +54,11 @@ export default class UsersController {
   }
 
   static async softDeleteUser(req, res) {
-    const { id } = req.params;
-    const result = await UsersService.delete(id);
-
-    if (result === null) {
-      throw new HTTP404Error();
-    }
-
-    if (result === false) {
-      throw new HTTP410Error();
-    }
-
-    res.status(httpStatusCode.OK_NO_CONTENT).end();
-  }
-
-  static async deleteGroupFromUser(req, res) {
-    const { userId, groupId } = req.params;
-    const result = await UsersService.removeGroup(userId, groupId);
-
-    if (result === null) {
-      throw new HTTP404Error();
-    }
-
-    if (result === false) {
-      throw new HTTP410Error();
-    }
-
-    res.status(httpStatusCode.OK_NO_CONTENT).end();
-  }
-
-  static async deleteGroupsFromUser(req, res) {
     const { userId } = req.params;
-    const result = await UsersService.removeGroups(userId);
+    const result = await UsersService.delete(userId);
 
     if (result === null) {
-      throw new HTTP404Error();
+      throw new HTTP404Error('user not found', { userId });
     }
 
     if (result === false) {

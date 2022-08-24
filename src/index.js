@@ -4,7 +4,7 @@ import express from 'express';
 import cors from 'cors';
 import { usersRouter, groupsRouter, loginRouter } from './routers';
 import { logger } from './logger';
-import { logRequest } from './middlewares';
+import { handleWildCard, logRequest } from './middlewares';
 import { errorHandler } from './errorHandler';
 
 const app = express();
@@ -17,6 +17,7 @@ app
   .use('/api/v1/login', loginRouter)
   .use('/api/v1/users', usersRouter)
   .use('/api/v1/groups', groupsRouter)
+  .use('*', handleWildCard)
   .use(errorHandler);
 
 app.listen(PORT, () => {

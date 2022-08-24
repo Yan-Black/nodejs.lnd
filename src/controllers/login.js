@@ -5,7 +5,6 @@ import { responseBuilder } from '../helpers/ResponseBuilder';
 export default class LoginController {
   static async getJWT(req, res) {
     const { userName, password } = req.body;
-
     const token = await LoginService.getToken(userName, password);
 
     if (!token) {

@@ -4,7 +4,7 @@ import { logger } from '../../logger';
 import { httpStatusCode } from '../../constants';
 
 export default class ErrorHandler {
-  responseMessage;
+  message;
 
   statusCode;
 
@@ -14,9 +14,9 @@ export default class ErrorHandler {
 
   static errorPrefix = 'centralized error-handler message:';
 
-  #setErrorInfo(message, status, details) {
-    this.responseMessage = message;
-    this.statusCode = status;
+  #setErrorInfo(message, statusCode, details) {
+    this.message = message;
+    this.statusCode = statusCode;
     this.details = details;
   }
 

@@ -8,10 +8,10 @@ export const errorHandler = (err, req, res, next) => {
 
   centralizedHandler.handleError(err);
 
-  const { responseMessage, statusCode, details } = centralizedHandler;
+  const { message, statusCode, details } = centralizedHandler;
 
   const response = responseBuilder.createErrorResponse(
-    responseMessage,
+    message,
     statusCode,
     details
   );
