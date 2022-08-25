@@ -37,7 +37,7 @@ export default class UsersController {
     }
 
     const response = responseBuilder.createResponse(user);
-    res.status(httpStatusCode.OK_NEW_RESOURCE_CREATED).json(response);
+    res.status(httpStatusCode.OK_CREATED).json(response);
   }
 
   static async updateUser(req, res) {

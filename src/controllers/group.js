@@ -34,7 +34,7 @@ export default class GroupsController {
     }
 
     const response = responseBuilder.createResponse(group);
-    res.status(httpStatusCode.OK_NEW_RESOURCE_CREATED).json(response);
+    res.status(httpStatusCode.OK_CREATED).json(response);
   }
 
   static async updateGroup(req, res) {
