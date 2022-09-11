@@ -1,84 +1,113 @@
 import request from 'supertest';
 import express from 'express';
 import { describe, expect, it } from '@jest/globals';
-import { usersRouter } from '../users';
+import { groupsRouter } from '../groups';
+import { httpStatusCode } from '../../constants';
+import userGroups from '../../database/seedData/usergroups.cjs';
+import { expectToMatchGroupSchema } from './utils';
 
+const [{ GroupId: testGroupId }] = userGroups;
 const defaultPath = '/api/v1/groups';
 const app = express();
 app.use(express.json());
-app.use(defaultPath, usersRouter);
+app.use(defaultPath, groupsRouter);
 
 describe('Groups Service -> Test Routes', () => {
-  it('returns all users on get request', async () => {
-    const res = await request(app).get(defaultPath);
+  it('returns all groups on get request', async () => {
+    const groupsResponse = await request(app).get(defaultPath);
 
-    expect(res.header['content-type']).toBe('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toHaveProperty('data');
-    expect(res.body.data.length).toBeGreaterThan(0);
+    expect(groupsResponse.header['content-type']).toBe(
+      'application/json; charset=utf-8'
+    );
+    expect(groupsResponse.statusCode).toBe(httpStatusCode.OK);
+    expect(groupsResponse.body).toHaveProperty('data');
+
+    const { data: groups } = groupsResponse.body;
+
+    expect(groups).toBeInstanceOf(Array);
+    expect(groups.length).toBeGreaterThan(0);
+
+    groups.forEach(expectToMatchGroupSchema);
   });
 
-  it('returns single object by matching id on get request', async () => {
-    const { body } = await request(app).get(defaultPath);
-    const [{ id }] = body.data;
+  it('returns single group data object by matching groupId on get request', async () => {
+    const groupResponse = await request(app).get(
+      `${defaultPath}/${testGroupId}`
+    );
 
-    const res = await request(app).get(`${defaultPath}/${id}`);
+    expect(groupResponse.header['content-type']).toBe(
+      'application/json; charset=utf-8'
+    );
+    expect(groupResponse.statusCode).toBe(httpStatusCode.OK);
+    expect(groupResponse.body).toHaveProperty('data');
 
-    expect(res.header['content-type']).toBe('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(body.data[0]);
+    const { data: group } = groupResponse.body;
+
+    expectToMatchGroupSchema(group);
   });
 
-  it('returns newly created object in groups collection on post request', async () => {
-    const mockGroup = {
-      name: 'visitors',
+  it('returns group data object on post request', async () => {
+    const testGroup = {
+      name: 'testPost',
       permissions: ['READ']
     };
 
-    const res = await request(app)
+    const createdGroupResponse = await request(app)
       .post(defaultPath)
-      .send(mockGroup)
+      .send(testGroup)
       .set('Accept', 'application/json');
 
-    const { body } = res;
-    const { name, permissions } = body;
+    expect(createdGroupResponse.header['content-type']).toBe(
+      'application/json; charset=utf-8'
+    );
+    expect(createdGroupResponse.statusCode).toBe(httpStatusCode.OK_CREATED);
+    expect(createdGroupResponse.body).toHaveProperty('data');
 
-    const toVerify = {
-      name,
-      permissions
-    };
+    const { data: group } = createdGroupResponse.body;
 
-    expect(res.header['content-type']).toBe('application/json; charset=utf-8');
-    expect(res.statusCode).toBe(200);
-    expect(body).toHaveProperty('id');
-    expect(toVerify).toMatchObject(mockGroup);
+    expectToMatchGroupSchema(group);
   });
 
-  it('returns group on put request', async () => {
-    const { body } = await request(app).get(defaultPath);
-    const [{ id }] = body.data;
-
-    const mockGroup = {
-      id,
-      name: 'customers',
-      permissions: ['READ', 'WRITE', 'SHARE']
+  it('returns group data object on post request', async () => {
+    const testGroup = {
+      name: 'TOP-ADMINS'
     };
 
-    const res = await request(app)
-      .put(`${defaultPath}/${id}`)
-      .send(mockGroup)
+    const updatedGroupResponse = await request(app)
+      .put(`${defaultPath}/${testGroupId}`)
+      .send(testGroup)
       .set('Accept', 'application/json');
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(mockGroup);
+    expect(updatedGroupResponse.header['content-type']).toBe(
+      'application/json; charset=utf-8'
+    );
+    expect(updatedGroupResponse.statusCode).toBe(httpStatusCode.OK);
+    expect(updatedGroupResponse.body).toHaveProperty('data');
+
+    const { data: group } = updatedGroupResponse.body;
+
+    expectToMatchGroupSchema(group);
+
+    expect(group.name).toEqual(testGroup.name);
   });
 
   it('returns 204 status code on delete request', async () => {
-    const { body } = await request(app).get(defaultPath);
-    const [{ id }] = body.data;
+    const testGroup = {
+      name: 'testDelete',
+      permissions: ['READ']
+    };
+
+    const createdGroupResponse = await request(app)
+      .post(defaultPath)
+      .send(testGroup)
+      .set('Accept', 'application/json');
+
+    const {
+      data: { id }
+    } = createdGroupResponse.body;
 
     const res = await request(app).delete(`${defaultPath}/${id}`);
 
-    expect(res.statusCode).toBe(204);
+    expect(res.statusCode).toBe(httpStatusCode.OK_NO_CONTENT);
   });
 });

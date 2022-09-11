@@ -12,6 +12,8 @@ class ResponseBuilder {
 
   #response = {};
 
+  #defaultErrorMessage = 'internal server';
+
   createResponse(data) {
     this.#response = {
       data
@@ -20,7 +22,11 @@ class ResponseBuilder {
     return this.#response;
   }
 
-  createErrorResponse(message, statusCode, details = {}) {
+  createErrorResponse(
+    message = this.#defaultErrorMessage,
+    statusCode = httpStatusCode.INTERNAL_SERVER,
+    details = {}
+  ) {
     this.#response = {
       error: {
         code: this.#errorCodeMap[statusCode],
