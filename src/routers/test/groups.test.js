@@ -1,20 +1,45 @@
 import request from 'supertest';
 import express from 'express';
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it, beforeAll } from '@jest/globals';
 import { groupsRouter } from '../groups';
+import { loginRouter } from '../login';
 import { httpStatusCode } from '../../constants';
 import userGroups from '../../database/seedData/usergroups.cjs';
+import seedUsers from '../../database/seedData/users.cjs';
 import { expectToMatchGroupSchema } from './utils';
 
 const [{ GroupId: testGroupId }] = userGroups;
 const defaultPath = '/api/v1/groups';
+const authPath = '/api/v1/login';
 const app = express();
 app.use(express.json());
 app.use(defaultPath, groupsRouter);
+app.use(authPath, loginRouter);
+
+let authToken;
 
 describe('Groups Service -> Test Routes', () => {
+  beforeAll(async () => {
+    const requestPayload = {
+      userName: seedUsers[3].login,
+      password: seedUsers[3].password
+    };
+
+    const loginResponse = await request(app)
+      .post(authPath)
+      .send(requestPayload);
+
+    const {
+      data: { token }
+    } = loginResponse.body;
+
+    authToken = token;
+  });
+
   it('returns all groups on get request', async () => {
-    const groupsResponse = await request(app).get(defaultPath);
+    const groupsResponse = await request(app)
+      .get(defaultPath)
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(groupsResponse.header['content-type']).toBe(
       'application/json; charset=utf-8'
@@ -31,9 +56,9 @@ describe('Groups Service -> Test Routes', () => {
   });
 
   it('returns single group data object by matching groupId on get request', async () => {
-    const groupResponse = await request(app).get(
-      `${defaultPath}/${testGroupId}`
-    );
+    const groupResponse = await request(app)
+      .get(`${defaultPath}/${testGroupId}`)
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(groupResponse.header['content-type']).toBe(
       'application/json; charset=utf-8'
@@ -55,7 +80,8 @@ describe('Groups Service -> Test Routes', () => {
     const createdGroupResponse = await request(app)
       .post(defaultPath)
       .send(testGroup)
-      .set('Accept', 'application/json');
+      .set('Accept', 'application/json')
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(createdGroupResponse.header['content-type']).toBe(
       'application/json; charset=utf-8'
@@ -76,7 +102,8 @@ describe('Groups Service -> Test Routes', () => {
     const updatedGroupResponse = await request(app)
       .put(`${defaultPath}/${testGroupId}`)
       .send(testGroup)
-      .set('Accept', 'application/json');
+      .set('Accept', 'application/json')
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(updatedGroupResponse.header['content-type']).toBe(
       'application/json; charset=utf-8'
@@ -100,13 +127,16 @@ describe('Groups Service -> Test Routes', () => {
     const createdGroupResponse = await request(app)
       .post(defaultPath)
       .send(testGroup)
-      .set('Accept', 'application/json');
+      .set('Accept', 'application/json')
+      .set('Authorization', `bearer ${authToken}`);
 
     const {
       data: { id }
     } = createdGroupResponse.body;
 
-    const res = await request(app).delete(`${defaultPath}/${id}`);
+    const res = await request(app)
+      .delete(`${defaultPath}/${id}`)
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(res.statusCode).toBe(httpStatusCode.OK_NO_CONTENT);
   });

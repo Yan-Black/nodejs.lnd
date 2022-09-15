@@ -5,20 +5,19 @@ import HTTP403Error from '../errorHandler/HTTP403Error';
 const { JWT_SECRET } = process.env;
 
 export const authenticate = (req, res, next) => {
-  next();
-  // const { authorization: bearerHeader } = req.headers;
+  const { authorization: bearerHeader } = req.headers;
 
-  // if (!bearerHeader) {
-  //   throw new HTTP401Error('unauthorized');
-  // }
+  if (!bearerHeader) {
+    throw new HTTP401Error('unauthorized');
+  }
 
-  // const token = bearerHeader.split(' ')[1];
+  const token = bearerHeader.split(' ')[1];
 
-  // jwt.verify(token, JWT_SECRET, (err) => {
-  //   if (err) {
-  //     throw new HTTP403Error('forbidden');
-  //   } else {
-  //     next();
-  //   }
-  // });
+  jwt.verify(token, JWT_SECRET, (err) => {
+    if (err) {
+      throw new HTTP403Error('forbidden');
+    } else {
+      next();
+    }
+  });
 };

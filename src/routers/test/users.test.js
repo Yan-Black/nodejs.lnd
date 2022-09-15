@@ -1,20 +1,45 @@
 import request from 'supertest';
 import express from 'express';
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it, beforeAll } from '@jest/globals';
 import { usersRouter } from '../users';
+import { loginRouter } from '../login';
 import { httpStatusCode } from '../../constants';
 import userGroups from '../../database/seedData/usergroups.cjs';
+import seedUsers from '../../database/seedData/users.cjs';
 import { expectToMatchUserSchema } from './utils';
 
 const [{ UserId: testUserId1 }] = userGroups;
 const defaultPath = '/api/v1/users';
+const authPath = '/api/v1/login';
 const app = express();
 app.use(express.json());
 app.use(defaultPath, usersRouter);
+app.use(authPath, loginRouter);
+
+let authToken;
 
 describe('Users Service -> Test Routes', () => {
+  beforeAll(async () => {
+    const requestPayload = {
+      userName: seedUsers[3].login,
+      password: seedUsers[3].password
+    };
+
+    const loginResponse = await request(app)
+      .post(authPath)
+      .send(requestPayload);
+
+    const {
+      data: { token }
+    } = loginResponse.body;
+
+    authToken = token;
+  });
+
   it('returns all users on get request', async () => {
-    const usersResponse = await request(app).get(defaultPath);
+    const usersResponse = await request(app)
+      .get(defaultPath)
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(usersResponse.header['content-type']).toBe(
       'application/json; charset=utf-8'
@@ -31,9 +56,9 @@ describe('Users Service -> Test Routes', () => {
   });
 
   it('returns users collection based on query parameters {loginSubstring} and {limit}', async () => {
-    const usersResponse = await request(app).get(
-      `${defaultPath}?loginSubstring=an&limit=4`
-    );
+    const usersResponse = await request(app)
+      .get(`${defaultPath}?loginSubstring=an&limit=4`)
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(usersResponse.header['content-type']).toBe(
       'application/json; charset=utf-8'
@@ -50,9 +75,9 @@ describe('Users Service -> Test Routes', () => {
   });
 
   it('returns user data object by matching userId on get request', async () => {
-    const userResponse = await request(app).get(
-      `${defaultPath}/${testUserId1}`
-    );
+    const userResponse = await request(app)
+      .get(`${defaultPath}/${testUserId1}`)
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(userResponse.header['content-type']).toBe(
       'application/json; charset=utf-8'
@@ -75,7 +100,8 @@ describe('Users Service -> Test Routes', () => {
     const createdUserResponse = await request(app)
       .post(defaultPath)
       .send(testUser)
-      .set('Accept', 'application/json');
+      .set('Accept', 'application/json')
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(createdUserResponse.header['content-type']).toBe(
       'application/json; charset=utf-8'
@@ -96,7 +122,8 @@ describe('Users Service -> Test Routes', () => {
     const updatedUserResponse = await request(app)
       .put(`${defaultPath}/${testUserId1}`)
       .send(testUser)
-      .set('Accept', 'application/json');
+      .set('Accept', 'application/json')
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(updatedUserResponse.header['content-type']).toBe(
       'application/json; charset=utf-8'
@@ -121,13 +148,16 @@ describe('Users Service -> Test Routes', () => {
     const createdUserResponse = await request(app)
       .post(defaultPath)
       .send(testUser)
-      .set('Accept', 'application/json');
+      .set('Accept', 'application/json')
+      .set('Authorization', `bearer ${authToken}`);
 
     const {
       data: { id }
     } = createdUserResponse.body;
 
-    const res = await request(app).delete(`${defaultPath}/${id}`);
+    const res = await request(app)
+      .delete(`${defaultPath}/${id}`)
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(res.statusCode).toBe(httpStatusCode.OK_NO_CONTENT);
   });

@@ -1,9 +1,11 @@
 import request from 'supertest';
 import express from 'express';
-import { describe, expect, it } from '@jest/globals';
+import { describe, expect, it, beforeAll } from '@jest/globals';
 import { usersRouter } from '../users';
 import { groupsRouter } from '../groups';
+import { loginRouter } from '../login';
 import userGroups from '../../database/seedData/usergroups.cjs';
+import seedUsers from '../../database/seedData/users.cjs';
 import { expectToMatchGroupSchema, expectToMatchUserSchema } from './utils';
 import { httpStatusCode } from '../../constants';
 
@@ -11,17 +13,39 @@ const [{ UserId: testUserId1, GroupId: testGroupId1 }] = userGroups;
 const [{ GroupId: testGroupId2 }] = userGroups.reverse();
 const defaultPath = '/api/v1/users';
 const groupsPath = '/api/v1/groups';
+const authPath = '/api/v1/login';
 
 const app = express();
 app.use(express.json());
 app.use(defaultPath, usersRouter);
 app.use(groupsPath, groupsRouter);
+app.use(authPath, loginRouter);
+
+let authToken;
 
 describe('Users Service -> Test Association Routes', () => {
+  beforeAll(async () => {
+    const requestPayload = {
+      userName: seedUsers[3].login,
+      password: seedUsers[3].password
+    };
+
+    const loginResponse = await request(app)
+      .post(authPath)
+      .send(requestPayload);
+
+    const {
+      data: { token }
+    } = loginResponse.body;
+
+    authToken = token;
+  });
+
   it('returns all associated groups with a user on get request', async () => {
     const userGroupsResponse = await request(app)
       .get(`${defaultPath}/${testUserId1}/groups`)
-      .set('Accept', 'application/json');
+      .set('Accept', 'application/json')
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(userGroupsResponse.header['content-type']).toBe(
       'application/json; charset=utf-8'
@@ -39,7 +63,8 @@ describe('Users Service -> Test Association Routes', () => {
   it('returns associated with a user group data object by matching groupId on get request', async () => {
     const userGroupResponse = await request(app)
       .get(`${defaultPath}/${testUserId1}/groups/${testGroupId1}`)
-      .set('Accept', 'application/json');
+      .set('Accept', 'application/json')
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(userGroupResponse.header['content-type']).toBe(
       'application/json; charset=utf-8'
@@ -59,7 +84,8 @@ describe('Users Service -> Test Association Routes', () => {
 
     const createdGroupResponse = await request(app)
       .post(groupsPath)
-      .send(testGroup);
+      .send(testGroup)
+      .set('Authorization', `bearer ${authToken}`);
 
     const {
       data: { id: testGroupId }
@@ -67,7 +93,8 @@ describe('Users Service -> Test Association Routes', () => {
 
     const userWithAddedGroupResponse = await request(app)
       .put(`${defaultPath}/${testUserId1}/groups/${testGroupId}`)
-      .set('Accept', 'application/json');
+      .set('Accept', 'application/json')
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(userWithAddedGroupResponse.header['content-type']).toBe(
       'application/json; charset=utf-8'
@@ -109,7 +136,8 @@ describe('Users Service -> Test Association Routes', () => {
       testGroups.map(async (groupDTO) => {
         const createdGroupResponse = await request(app)
           .post(groupsPath)
-          .send(groupDTO);
+          .send(groupDTO)
+          .set('Authorization', `bearer ${authToken}`);
 
         const {
           data: { id: putTestGroupId }
@@ -126,7 +154,8 @@ describe('Users Service -> Test Association Routes', () => {
     const userWithAddedGroupsResponse = await request(app)
       .put(`${defaultPath}/${testUserId1}/groups`)
       .send(requestPayload)
-      .set('Accept', 'application/json');
+      .set('Accept', 'application/json')
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(userWithAddedGroupsResponse.header['content-type']).toBe(
       'application/json; charset=utf-8'
@@ -158,7 +187,8 @@ describe('Users Service -> Test Association Routes', () => {
 
     const createdUserResponse = await request(app)
       .post(defaultPath)
-      .send(testUser);
+      .send(testUser)
+      .set('Authorization', `bearer ${authToken}`);
 
     const {
       data: { id: testUserId }
@@ -166,19 +196,20 @@ describe('Users Service -> Test Association Routes', () => {
 
     await request(app)
       .put(`${defaultPath}/${testUserId}/groups/${testGroupId1}`)
-      .set('Accept', 'application/json');
+      .set('Accept', 'application/json')
+      .set('Authorization', `bearer ${authToken}`);
 
-    const deleteAssociatedGroupResponse = await request(app).delete(
-      `${defaultPath}/${testUserId}/groups/${testGroupId1}`
-    );
+    const deleteAssociatedGroupResponse = await request(app)
+      .delete(`${defaultPath}/${testUserId}/groups/${testGroupId1}`)
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(deleteAssociatedGroupResponse.statusCode).toBe(
       httpStatusCode.OK_NO_CONTENT
     );
 
-    const associatedGroupsResponse = await request(app).get(
-      `${defaultPath}/${testUserId}/groups`
-    );
+    const associatedGroupsResponse = await request(app)
+      .get(`${defaultPath}/${testUserId}/groups`)
+      .set('Authorization', `bearer ${authToken}`);
 
     const {
       body: { data: groups }
@@ -197,7 +228,8 @@ describe('Users Service -> Test Association Routes', () => {
 
     const createdUserResponse = await request(app)
       .post(defaultPath)
-      .send(testUser);
+      .send(testUser)
+      .set('Authorization', `bearer ${authToken}`);
 
     const {
       data: { id: testUserId }
@@ -210,19 +242,20 @@ describe('Users Service -> Test Association Routes', () => {
     await request(app)
       .put(`${defaultPath}/${testUserId}/groups`)
       .send(requestPayload)
-      .set('Accept', 'application/json');
+      .set('Accept', 'application/json')
+      .set('Authorization', `bearer ${authToken}`);
 
-    const deleteAssociatedGroupsResponse = await request(app).delete(
-      `${defaultPath}/${testUserId}/groups`
-    );
+    const deleteAssociatedGroupsResponse = await request(app)
+      .delete(`${defaultPath}/${testUserId}/groups`)
+      .set('Authorization', `bearer ${authToken}`);
 
     expect(deleteAssociatedGroupsResponse.statusCode).toBe(
       httpStatusCode.OK_NO_CONTENT
     );
 
-    const associatedGroupsResponse = await request(app).get(
-      `${defaultPath}/${testUserId}/groups`
-    );
+    const associatedGroupsResponse = await request(app)
+      .get(`${defaultPath}/${testUserId}/groups`)
+      .set('Authorization', `bearer ${authToken}`);
 
     const {
       body: { data: groups }
