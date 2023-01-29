@@ -1,6 +1,6 @@
 import { db } from '../database/models';
 
-const { User, Group, sequelize } = db;
+const { User, Group, UserGroup, sequelize } = db;
 const { Op } = db.Sequelize;
 
 export default class UsersService {
@@ -33,144 +33,29 @@ export default class UsersService {
     return user;
   }
 
-  static async getAssociatedGroup(userId, groupId) {
-    const user = await User.findByPk(userId);
+  static async create(userDTO) {
+    const createUserTransaction = async (transaction) => {
+      let user = null;
 
-    if (!user) {
-      return null;
-    }
-
-    const group = await Group.findByPk(groupId, {
-      include: {
-        model: User,
-        as: 'users',
-        through: { attributes: [] },
-        ...UsersService.excludeAttributes
+      if (userDTO.id) {
+        user = await User.findByPk(userDTO.id, { transaction });
       }
-    });
 
-    if (!group) {
-      return null;
-    }
-
-    const hasGroup = user.hasGroup(group);
-
-    if (hasGroup) {
-      return group;
-    }
-
-    return null;
-  }
-
-  static async getAssociatedGroups(id) {
-    const user = await User.findByPk(id);
-
-    if (!user) {
-      return null;
-    }
-
-    const groups = await user.getGroups({ joinTableAttributes: [] });
-
-    if (!groups) {
-      return null;
-    }
-
-    return groups;
-  }
-
-  static async addGroups(userId, groupIds) {
-    const addGroupsTransaction = (transaction) => {
-      const dbTransactionPromises = (
-        Array.isArray(groupIds) ? groupIds : [groupIds]
-      ).map(async (groupId) => {
-        const user = await User.findByPk(userId, {
-          ...UsersService.excludeAttributes,
-          ...UsersService.associate,
-          transaction
-        });
-
-        if (!user) {
-          return null;
-        }
-
-        const group = await Group.findByPk(groupId, { transaction });
-
-        if (!group) {
-          return null;
-        }
-
-        const hasGroup = await user.hasGroup(group, { transaction });
-
-        if (hasGroup) {
-          return user;
-        }
-
-        await user.addGroup(group, { transaction });
-        await user.reload({ ...UsersService.excludeAttributes, transaction });
-
-        return user;
-      });
-
-      return Promise.all(dbTransactionPromises);
-    };
-
-    const results = await sequelize.transaction(addGroupsTransaction);
-    const [user] = results.filter(Boolean).reverse();
-
-    if (user) {
-      const groups = user.getGroups({ joinTableAttributes: [] });
-      return groups;
-    }
-
-    return [];
-  }
-
-  static async removeGroup(userId, groupId) {
-    const removeGroupTransaction = async (transaction) => {
-      const user = await User.findByPk(userId, {
-        transaction
-      });
-
-      if (!user) {
+      if (user) {
         return null;
       }
 
-      if (groupId) {
-        const group = await Group.findByPk(groupId, { transaction });
-
-        if (!group) {
-          return null;
-        }
-
-        const result = await user.removeGroup(group, { transaction });
-        return Boolean(result);
-      }
-
-      const userGroups = await user.getGroups({ transaction });
-      const result = await user.removeGroups(userGroups, { transaction });
-
-      return Boolean(result);
+      const created = await User.create(userDTO, { transaction, hooks: true });
+      return created;
     };
 
-    const result = await sequelize.transaction(removeGroupTransaction);
-    return result;
-  }
-
-  static async create(userDTO) {
-    const [user] = await User.findOrCreate({
-      where: {
-        ...userDTO
-      },
-      ...UsersService.excludeAttributes
-    });
-
+    const user = await sequelize.transaction(createUserTransaction);
     return user;
   }
 
   static async update(id, userDTO) {
     const user = await User.findByPk(id, {
-      ...UsersService.excludeAttributes,
-      ...UsersService.associate
+      ...UsersService.excludeAttributes
     });
 
     if (!user) {
@@ -181,21 +66,39 @@ export default class UsersService {
       where: { id }
     });
     await user.reload({
-      ...UsersService.excludeAttributes,
-      ...UsersService.associate
+      ...UsersService.excludeAttributes
     });
 
     return user;
   }
 
   static async delete(id) {
-    const user = await User.findByPk(id);
+    const deleteUserTransaction = async (transaction) => {
+      const user = await User.findByPk(id, { transaction });
 
-    if (!user) {
-      return null;
-    }
+      if (!user) {
+        return null;
+      }
 
-    const result = await User.destroy({ where: { id } });
-    return Boolean(result);
+      const result = await User.destroy({
+        where: { id },
+        transaction
+      });
+      /* Manual joint table record deletion.
+      Not supported in Sequilize for paranoid tables. */
+      if (result) {
+        await UserGroup.destroy({
+          where: {
+            UserId: id
+          },
+          transaction
+        });
+      }
+
+      return Boolean(result);
+    };
+
+    const result = sequelize.transaction(deleteUserTransaction);
+    return result;
   }
 }

@@ -3,42 +3,62 @@ import BaseError from '../BaseError';
 import { logger } from '../../logger';
 import { httpStatusCode } from '../../constants';
 
-class ErrorHandler {
-  responseMessage;
+export default class ErrorHandler {
+  message;
 
   statusCode;
 
-  #isOpError = false;
+  details;
 
-  handleError(error) {
-    if (error instanceof Sequelize.ValidationError) {
-      this.handleSequelizeValidationError(error);
-      return;
-    }
+  meta = {};
 
-    this.responseMessage = error.message || httpStatusCode.INTERNAL_SERVER;
-    this.statusCode = error.statusCode || 'internal server';
+  static errorPrefix = 'centralized error-handler message:';
 
-    logger.error('centralized error-handler message:', error);
+  #setErrorInfo(message, statusCode, details) {
+    this.message = message;
+    this.statusCode = statusCode;
+    this.details = details;
   }
 
-  handleSequelizeValidationError(error) {
-    this.responseMessage = error.parent.detail;
-    this.statusCode = httpStatusCode.BAD_REQUEST;
+  #handleSequilizeDatabaseError(error) {
+    this.#setErrorInfo(error.message, httpStatusCode.BAD_REQUEST, {});
+    logger.error(ErrorHandler.errorPrefix, error);
+  }
 
+  #handleSequelizeValidationError(error) {
+    this.#setErrorInfo(error.parent.detail, httpStatusCode.BAD_REQUEST, {});
     logger.error(
-      `centralized error-handler message: ${this.responseMessage}`,
+      `${ErrorHandler.errorPrefix} ${this.responseMessage}`,
       error.parent
     );
   }
 
-  isOperational(error) {
-    if (error instanceof BaseError) {
-      this.#isOpError = error.isOperational;
-      return this.#isOpError;
+  handleError(error) {
+    if (error.name === 'SequelizeDatabaseError') {
+      this.#handleSequilizeDatabaseError(error);
+      return;
     }
 
-    return this.#isOpError;
+    if (error instanceof Sequelize.ValidationError) {
+      this.#handleSequelizeValidationError(error);
+      return;
+    }
+
+    this.#setErrorInfo(
+      error.message || 'internal server',
+      error.statusCode || httpStatusCode.INTERNAL_SERVER,
+      error.details
+    );
+
+    logger.error(ErrorHandler.errorPrefix, error);
+  }
+
+  static isOperational(error) {
+    if (error instanceof BaseError) {
+      return error.isOperational;
+    }
+
+    return false;
   }
 }
 

@@ -1,1 +1,1 @@
-export * from './getJoiErrorResponse';
+export * from './getJoiErrorDetails';

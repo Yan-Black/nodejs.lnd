@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 import { Model } from 'sequelize';
 
 export default (sequelize, DataTypes) => {
@@ -6,6 +7,7 @@ export default (sequelize, DataTypes) => {
       User.belongsToMany(models.Group, {
         through: models.UserGroup,
         onDelete: 'CASCADE',
+        hooks: true,
         as: {
           plural: 'groups',
           singular: 'group'
@@ -31,7 +33,14 @@ export default (sequelize, DataTypes) => {
       paranoid: true,
       deletedAt: 'deletedAt',
       modelName: User.name,
-      timestamps: true
+      timestamps: true,
+      hooks: {
+        afterCreate(record) {
+          delete record.dataValues.updatedAt;
+          delete record.dataValues.createdAt;
+          delete record.dataValues.deletedAt;
+        }
+      }
     }
   );
 

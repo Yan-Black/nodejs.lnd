@@ -6,8 +6,9 @@ export default class APIError extends BaseError {
     name,
     statusCode = httpStatusCode.INTERNAL_SERVER,
     isOperational = true,
-    description = 'internal server error'
+    description = 'internal server error',
+    details = {}
   }) {
-    super({ name, statusCode, description, isOperational });
+    super({ name, statusCode, description, isOperational, details });
   }
 }

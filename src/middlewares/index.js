@@ -1,3 +1,4 @@
 export * from './authenticate';
-export * from './userBodyJoiValidate';
+export * from './joiValidate';
 export * from './logRequest';
+export * from './handleWildCard';
